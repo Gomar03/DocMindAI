@@ -113,7 +113,7 @@ if (!array_key_exists($LANGUAGE, $AVAILABLE_LANGUAGES)) {
  * System prompt for the AI model
  * Contains instructions for performing OCR on images
  */
-$SYSTEM_PROMPT = "Perform Optical Character Recognition (OCR) on the following image data. Extract and return ONLY the text you see in the image. Do not add any explanations, introductions, or markdown formatting. Return only the raw text content.
+$SYSTEM_PROMPT = "Perform Optical Character Recognition (OCR) on the following image data. Extract and return ONLY the text you see in the image, formatted appropriately in Markdown. Do not add any explanations or introductions. Return only the Markdown formatted text content.
 
 " . $language_instructions[$LANGUAGE];
 
@@ -561,7 +561,7 @@ function preprocessImageForOCR($image_path) {
                         <h2 style="color: #111827; font-size: 20px;">OCR Result</h2>
                     </div>
                     
-                    <div class="markdown-result"><?php echo htmlspecialchars($result); ?></div>
+                    <div class="markdown-result"><?php echo $result; ?></div>
                 </div>
                 
                 <?php if (isset($preprocessed_image_base64)): ?>
