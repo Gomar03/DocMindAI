@@ -26,20 +26,31 @@ $AVAILABLE_LANGUAGES = [
 $MODEL = isset($_POST['model']) ? $_POST['model'] : 'gemma2:2b';
 $LANGUAGE = isset($_POST['language']) ? $_POST['language'] : 'ro';
 
-// System prompt
-$SYSTEM_PROMPT = "Ești un asistent medical care analizează rapoarte radiologice în limba română.
+// System prompt with language support
+$language_instructions = [
+    'ro' => 'Răspunde în limba română.',
+    'en' => 'Respond in English.',
+    'es' => 'Responde en español.',
+    'fr' => 'Répondez en français.',
+    'de' => 'Antworte auf Deutsch.',
+    'it' => 'Rispondi in italiano.'
+];
+
+$SYSTEM_PROMPT = "Ești un asistent medical care analizează rapoarte radiologice.
 
 SARCINĂ: Citește raportul și extrage informația patologică principală în format JSON.
 
+" . $language_instructions[$LANGUAGE] . "
+
 FORMAT DE IEȘIRE (JSON):
 {
-  \"patologic\": \"da/nu\",
+  \"patologic\": \"da/nu\" (or yes/no in English),
   \"severitate\": 1-10,
   \"diagnostic\": \"1-5 cuvinte\"
 }
 
 REGULI:
-- \"patologic\": \"da\" dacă există orice anomalie, altfel \"nu\"
+- \"patologic\": \"da\" dacă există orice anomalie, altfel \"nu\" (yes/no for English)
 - \"severitate\": 1=minim, 5=moderat, 10=critic/urgent
 - \"diagnostic\": maxim 5 cuvinte (ex: \"fractură\", \"pneumonie\", \"nodul pulmonar\")
 - Dacă totul este normal: {\"patologic\": \"nu\", \"severitate\": 0, \"diagnostic\": \"normal\"}
@@ -378,6 +389,7 @@ function getSeverityLabel($severity) {
             font-size: 12px;
             color: #1e40af;
             margin-bottom: 20px;
+            display: none;
         }
         
         @keyframes spin {
@@ -404,10 +416,6 @@ function getSeverityLabel($severity) {
         </div>
         
         <div class="content">
-            <div class="config-info">
-                <strong>Configurare:</strong> API @ <?php echo htmlspecialchars($API_ENDPOINT); ?>
-            </div>
-            
             <form method="POST" action="" id="analysisForm">
                 <div class="form-group">
                     <label for="model">Model AI:</label>
@@ -415,6 +423,18 @@ function getSeverityLabel($severity) {
                         <?php foreach ($AVAILABLE_MODELS as $value => $label): ?>
                             <option value="<?php echo htmlspecialchars($value); ?>" 
                                 <?php echo ($MODEL === $value) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($label); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="language">Limba răspuns / Output Language:</label>
+                    <select id="language" name="language">
+                        <?php foreach ($AVAILABLE_LANGUAGES as $value => $label): ?>
+                            <option value="<?php echo htmlspecialchars($value); ?>" 
+                                <?php echo ($LANGUAGE === $value) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($label); ?>
                             </option>
                         <?php endforeach; ?>
@@ -484,6 +504,7 @@ function getSeverityLabel($severity) {
         function clearForm() {
             document.getElementById('report').value = '';
             document.getElementById('model').selectedIndex = 0;
+            document.getElementById('language').selectedIndex = 0;
             // Reload page to clear results
             window.location.href = window.location.pathname;
         }
