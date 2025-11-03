@@ -1,4 +1,51 @@
 <?php
+/**
+ * Radiology Report Analyzer
+ * 
+ * A PHP web application that uses AI to analyze radiology reports and extract
+ * key medical information in a structured JSON format.
+ * 
+ * Features:
+ * - AI-powered analysis of radiology reports
+ * - Multiple lightweight AI models support
+ * - Multilingual output (6 languages)
+ * - Web interface with real-time results
+ * - REST API support
+ * - Configurable API endpoint via external config.php
+ * 
+ * Requirements:
+ * - PHP 7.0+
+ * - cURL extension
+ * - JSON extension
+ * - Access to compatible AI API (e.g., Ollama)
+ * 
+ * Usage:
+ * - Web interface: Access via browser
+ * - API endpoint: POST /rra.php with report data
+ * 
+ * API Usage:
+ * POST /rra.php
+ * Parameters:
+ * - report (required): Radiology report text
+ * - model (optional): AI model to use (default: qwen2.5:1.5b)
+ * - language (optional): Output language (default: ro)
+ * 
+ * Response:
+ * {
+ *   "pathologic": "yes/no",
+ *   "severity": 0-10,
+ *   "diagnostic": "diagnosis text"
+ * }
+ * 
+ * Configuration:
+ * Create a config.php file with:
+ * - $API_ENDPOINT: AI API endpoint URL
+ * - $API_KEY: API key (if required)
+ * 
+ * @author [Author Name]
+ * @version 1.0
+ * @license MIT
+ */
 // Configuration - Load from config.php if available, otherwise use defaults
 if (file_exists('config.php')) {
     include 'config.php';
