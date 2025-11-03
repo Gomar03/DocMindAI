@@ -1,15 +1,16 @@
 <?php
 // Configuration
-$API_ENDPOINT = 'http://localhost:11434/v1/chat/completions'; // Change to your API endpoint
+$API_ENDPOINT = 'http://192.168.3.16:11434/v1/chat/completions'; // Change to your API endpoint
 $API_KEY = ''; // Add your API key if needed (leave empty for Ollama)
 
 // Available models
 $AVAILABLE_MODELS = [
+    'gemma3:1b' => 'Gemma 3 (1B)',
     'gemma2:2b' => 'Gemma 2 (2B)',
+    'qwen3:1.7b' => 'Qwen 3 (1.7B)',
     'qwen2.5:1.5b' => 'Qwen 2.5 (1.5B)',
-    'phi3:mini' => 'Phi 3 Mini',
-    'llama3.2:1b' => 'Llama 3.2 (1B)',
-    'gemma:2b' => 'Gemma 1 (2B)'
+    'phi3:mini' => 'Phi 3 Mini (3.8B)',
+    'llama3.2:1b' => 'Llama 3.2 (1B)'
 ];
 
 // Available output languages
@@ -23,7 +24,7 @@ $AVAILABLE_LANGUAGES = [
 ];
 
 // Get selected model and language
-$MODEL = isset($_POST['model']) ? $_POST['model'] : 'gemma2:2b';
+$MODEL = isset($_POST['model']) ? $_POST['model'] : 'qwen2.5:1.5b';
 $LANGUAGE = isset($_POST['language']) ? $_POST['language'] : 'ro';
 
 // System prompt with language support
@@ -36,6 +37,17 @@ $language_instructions = [
     'it' => 'Rispondi in italiano.'
 ];
 
+// Validate model selection
+if (!array_key_exists($MODEL, $AVAILABLE_MODELS)) {
+    $MODEL = 'qwen2.5:1.5b'; // Default to a valid model
+}
+
+// Validate language selection
+if (!array_key_exists($LANGUAGE, $AVAILABLE_LANGUAGES)) {
+    $LANGUAGE = 'ro'; // Default to Romanian
+}
+
+// System prompt
 $SYSTEM_PROMPT = "Ești un asistent medical care analizează rapoarte radiologice.
 
 SARCINĂ: Citește raportul și extrage informația patologică principală în format JSON.
@@ -44,29 +56,29 @@ SARCINĂ: Citește raportul și extrage informația patologică principală în 
 
 FORMAT DE IEȘIRE (JSON):
 {
-  \"patologic\": \"da/nu\" (or yes/no in English),
-  \"severitate\": 1-10,
-  \"diagnostic\": \"1-5 cuvinte\"
+  \"pathologic\": \"yes/no\",
+  \"severity\": 1-10,
+  \"diagnostic\": \"1-5 words\"
 }
 
 REGULI:
-- \"patologic\": \"da\" dacă există orice anomalie, altfel \"nu\" (yes/no for English)
-- \"severitate\": 1=minim, 5=moderat, 10=critic/urgent
+- \"pathologic\": \"yes\" dacă există orice anomalie, altfel \"no\"
+- \"severity\": 1=minim, 5=moderat, 10=critic/urgent
 - \"diagnostic\": maxim 5 cuvinte (ex: \"fractură\", \"pneumonie\", \"nodul pulmonar\")
-- Dacă totul este normal: {\"patologic\": \"nu\", \"severitate\": 0, \"diagnostic\": \"normal\"}
+- Dacă totul este normal: {\"pathologic\": \"no\", \"severity\": 0, \"diagnostic\": \"normal\"}
 - Ignoră erorile de ortografie
 - Răspunde DOAR cu JSON-ul, fără text suplimentar
 
 EXEMPLE:
 
 Raport: \"Opacitate hazilă în câmpul pulmonar stâng mijlociu, posibil reprezentând o consolidare sau infiltrat.\"
-Răspuns: {\"patologic\": \"da\", \"severitate\": 6, \"diagnostic\": \"consolidare pulmonară\"}
+Răspuns: {\"pathologic\": \"yes\", \"severity\": 6, \"diagnostic\": \"consolidare pulmonară\"}
 
 Raport: \"Fără modificări patologice. Inima de dimensiuni normale.\"
-Răspuns: {\"patologic\": \"nu\", \"severitate\": 0, \"diagnostic\": \"normal\"}
+Răspuns: {\"pathologic\": \"no\", \"severity\": 0, \"diagnostic\": \"normal\"}
 
 Raport: \"Fractură deplasată a femurului distal dreapta cu hematom important\"
-Răspuns: {\"patologic\": \"da\", \"severitate\": 8, \"diagnostic\": \"fractură femur\"}";
+Răspuns: {\"pathologic\": \"yes\", \"severity\": 8, \"diagnostic\": \"fractură femur\"}";
 
 $result = null;
 $error = null;
@@ -77,7 +89,23 @@ $is_api_request = false;
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
     $processing = true;
     $is_api_request = !isset($_POST['submit']); // If no submit button, it's an API request
+    
+    // Sanitize and validate input
     $report = trim($_POST['report']);
+    
+    // Validate report length (prevent extremely large inputs)
+    if (strlen($report) > 10000) {
+        $error = 'Raportul este prea lung. Maxim 10.000 caractere permise.';
+        $processing = false;
+    } 
+    // Validate report is not empty after trimming
+    elseif (empty($report)) {
+        $error = 'Raportul nu poate fi gol.';
+        $processing = false;
+    }
+    
+    // Only proceed with API call if validation passed
+    if ($processing) {
     
     // Prepare API request
     $data = [
@@ -99,7 +127,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
         'Content-Type: application/json',
         'Authorization: Bearer ' . $API_KEY
     ]);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 120);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
     
     $response = curl_exec($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -111,7 +141,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
     } else {
         $response_data = json_decode($response, true);
         
-        if (isset($response_data['choices'][0]['message']['content'])) {
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $error = 'Invalid API response format: ' . json_last_error_msg();
+        } elseif (isset($response_data['choices'][0]['message']['content'])) {
             $content = trim($response_data['choices'][0]['message']['content']);
             
             // Extract JSON from response (in case model adds extra text)
@@ -121,6 +153,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
                 
                 if (json_last_error() !== JSON_ERROR_NONE) {
                     $error = 'Invalid JSON response: ' . json_last_error_msg();
+                } elseif (!isset($result['pathologic']) || !isset($result['severity']) || !isset($result['diagnostic'])) {
+                    $error = 'JSON response missing required fields';
+                } elseif (!in_array($result['pathologic'], ['yes', 'no'])) {
+                    $error = 'Invalid pathologic value in response';
+                } elseif (!is_numeric($result['severity']) || $result['severity'] < 0 || $result['severity'] > 10) {
+                    $error = 'Invalid severity value in response';
+                } elseif (!is_string($result['diagnostic']) || empty($result['diagnostic'])) {
+                    $error = 'Invalid diagnostic value in response';
                 }
             } else {
                 $error = 'No JSON found in response: ' . $content;
@@ -143,6 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
         exit;
     }
 }
+} // Close the if ($processing) block
 
 // Helper function to get severity color
 function getSeverityColor($severity) {
@@ -298,7 +339,7 @@ function getSeverityLabel($severity) {
             background: #f9fafb;
             border-radius: 12px;
             padding: 24px;
-            margin-top: 24px;
+            margin-bottom: 24px;
             border: 2px solid #e5e7eb;
         }
         
@@ -414,8 +455,42 @@ function getSeverityLabel($severity) {
             <h1>🏥 Analizor Rapoarte Radiologice</h1>
             <p>Analiză automată cu AI a rapoartelor medicale</p>
         </div>
-        
+
         <div class="content">
+            <?php if ($error): ?>
+                <div class="error">
+                    <strong>⚠️ Eroare:</strong> <?php echo htmlspecialchars($error); ?>
+                </div>
+            <?php endif; ?>
+            
+            <?php if ($result): ?>
+                <div class="result-card">
+                    <div class="result-header">
+                        <h2 style="color: #111827; font-size: 20px;">Rezultat Analiză</h2>
+                        <span class="pathology-badge <?php echo $result['pathologic'] === 'yes' ? 'pathology-yes' : 'pathology-no'; ?>">
+                            <?php echo $result['pathologic'] === 'yes' ? '⚠️ Patologic' : '✓ Normal'; ?>
+                        </span>
+                    </div>
+                    
+                    <div class="severity-container">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <strong style="color: #374151;">Severitate:</strong>
+                            <span style="font-weight: 600; color: <?php echo getSeverityColor($result['severity']); ?>">
+                                <?php echo getSeverityLabel($result['severity']); ?> (<?php echo $result['severity']; ?>/10)
+                            </span>
+                        </div>
+                        <div class="severity-bar">
+                            <div class="severity-fill" style="width: <?php echo $result['severity'] * 10; ?>%; background: <?php echo getSeverityColor($result['severity']); ?>;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="diagnostic-box">
+                        <div class="diagnostic-label">Diagnostic</div>
+                        <div class="diagnostic-text"><?php echo htmlspecialchars($result['diagnostic']); ?></div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
             <form method="POST" action="" id="analysisForm">
                 <div class="form-group">
                     <label for="model">Model AI:</label>
@@ -463,40 +538,6 @@ function getSeverityLabel($severity) {
                     🔄 Analiză Nouă
                 </button>
             </form>
-            
-            <?php if ($error): ?>
-                <div class="error">
-                    <strong>⚠️ Eroare:</strong> <?php echo htmlspecialchars($error); ?>
-                </div>
-            <?php endif; ?>
-            
-            <?php if ($result): ?>
-                <div class="result-card">
-                    <div class="result-header">
-                        <h2 style="color: #111827; font-size: 20px;">Rezultat Analiză</h2>
-                        <span class="pathology-badge <?php echo $result['patologic'] === 'da' ? 'pathology-yes' : 'pathology-no'; ?>">
-                            <?php echo $result['patologic'] === 'da' ? '⚠️ Patologic' : '✓ Normal'; ?>
-                        </span>
-                    </div>
-                    
-                    <div class="severity-container">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <strong style="color: #374151;">Severitate:</strong>
-                            <span style="font-weight: 600; color: <?php echo getSeverityColor($result['severitate']); ?>">
-                                <?php echo getSeverityLabel($result['severitate']); ?> (<?php echo $result['severitate']; ?>/10)
-                            </span>
-                        </div>
-                        <div class="severity-bar">
-                            <div class="severity-fill" style="width: <?php echo $result['severitate'] * 10; ?>%; background: <?php echo getSeverityColor($result['severitate']); ?>;"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="diagnostic-box">
-                        <div class="diagnostic-label">Diagnostic</div>
-                        <div class="diagnostic-text"><?php echo htmlspecialchars($result['diagnostic']); ?></div>
-                    </div>
-                </div>
-            <?php endif; ?>
         </div>
     </div>
     
