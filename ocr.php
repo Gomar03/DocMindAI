@@ -55,6 +55,7 @@ if (file_exists('config.php')) {
 
 // Available models
 $AVAILABLE_MODELS = [
+    'llama3.2-vision' => 'Llama 3.2 Vision',
     'gemma3:1b' => 'Gemma 3 (1B)',
     'gemma2:2b' => 'Gemma 2 (2B)',
     'qwen3:1.7b' => 'Qwen 3 (1.7B)',
@@ -76,7 +77,7 @@ $AVAILABLE_LANGUAGES = [
 /**
  * Get selected model and language from POST data or use defaults
  */
-$MODEL = isset($_POST['model']) ? $_POST['model'] : 'qwen2.5:1.5b';
+$MODEL = isset($_POST['model']) ? $_POST['model'] : 'llama3.2-vision';
 $LANGUAGE = isset($_POST['language']) ? $_POST['language'] : 'ro';
 
 /**
