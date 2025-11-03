@@ -156,14 +156,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image']) && $_FILES[
     
     // Only proceed with API call if validation passed
     if ($processing) {
-        // Read and encode image file
-        $image_data = file_get_contents($image_file['tmp_name']);
-        if ($image_data === false) {
-            $error = 'Failed to read the uploaded image file.';
+        // Preprocess image for better OCR
+        $preprocessed_image_path = preprocessImageForOCR($image_file['tmp_name']);
+        if ($preprocessed_image_path === false) {
+            $error = 'Failed to preprocess the image for OCR.';
             $processing = false;
         } else {
-            $base64_image = base64_encode($image_data);
-            $image_url = 'data:' . $image_file['type'] . ';base64,' . $base64_image;
+            // Read and encode preprocessed image
+            $image_data = file_get_contents($preprocessed_image_path);
+            if ($image_data === false) {
+                $error = 'Failed to read the preprocessed image file.';
+                $processing = false;
+            } else {
+                $base64_image = base64_encode($image_data);
+                $image_url = 'data:image/png;base64,' . $base64_image;
+                // Store base64 for display
+                $preprocessed_image_base64 = $base64_image;
+            }
+            // Clean up temporary file
+            unlink($preprocessed_image_path);
         }
     }
     
@@ -249,6 +260,89 @@ function formatFileSize($bytes) {
     $pow = min($pow, count($units) - 1);
     $bytes /= pow(1024, $pow);
     return round($bytes, 2) . ' ' . $units[$pow];
+}
+
+/**
+ * Preprocess image for better OCR results
+ * Enhances contrast, applies threshold, and resizes image
+ * 
+ * @param string $image_path Path to the original image
+ * @return string|false Path to preprocessed image or false on error
+ */
+function preprocessImageForOCR($image_path) {
+    // Create temporary file path
+    $temp_path = tempnam(sys_get_temp_dir(), 'ocr_') . '.png';
+    
+    // Get image info
+    $image_info = getimagesize($image_path);
+    if ($image_info === false) {
+        return false;
+    }
+    
+    // Create image resource based on type
+    $image = null;
+    switch ($image_info[2]) {
+        case IMAGETYPE_JPEG:
+            $image = imagecreatefromjpeg($image_path);
+            break;
+        case IMAGETYPE_PNG:
+            $image = imagecreatefrompng($image_path);
+            break;
+        case IMAGETYPE_GIF:
+            $image = imagecreatefromgif($image_path);
+            break;
+        case IMAGETYPE_WEBP:
+            $image = imagecreatefromwebp($image_path);
+            break;
+        default:
+            return false;
+    }
+    
+    if ($image === false) {
+        return false;
+    }
+    
+    // Get original dimensions
+    $width = imagesx($image);
+    $height = imagesy($image);
+    
+    // Calculate new dimensions (max 500x500)
+    $max_size = 500;
+    $ratio = min($max_size / $width, $max_size / $height);
+    $new_width = intval($width * $ratio);
+    $new_height = intval($height * $ratio);
+    
+    // Create new image with new dimensions
+    $resized_image = imagecreatetruecolor($new_width, $new_height);
+    
+    // Preserve transparency for PNG
+    if ($image_info[2] === IMAGETYPE_PNG) {
+        imagealphablending($resized_image, false);
+        imagesavealpha($resized_image, true);
+        $transparent = imagecolorallocatealpha($resized_image, 255, 255, 255, 127);
+        imagefilledrectangle($resized_image, 0, 0, $new_width, $new_height, $transparent);
+    }
+    
+    // Resize image
+    imagecopyresampled($resized_image, $image, 0, 0, 0, 0, $new_width, $new_height, $width, $height);
+    
+    // Convert to grayscale
+    imagefilter($resized_image, IMG_FILTER_GRAYSCALE);
+    
+    // Enhance contrast
+    imagefilter($resized_image, IMG_FILTER_CONTRAST, -20);
+    
+    // Apply threshold (convert to black and white)
+    imagefilter($resized_image, IMG_FILTER_THRESHOLD, 127);
+    
+    // Save as PNG
+    $success = imagepng($resized_image, $temp_path, 9); // Compression level 9
+    
+    // Clean up
+    imagedestroy($image);
+    imagedestroy($resized_image);
+    
+    return $success ? $temp_path : false;
 }
 ?>
 <!DOCTYPE html>
@@ -467,6 +561,19 @@ function formatFileSize($bytes) {
                     
                     <div class="markdown-result"><?php echo htmlspecialchars($result); ?></div>
                 </div>
+                
+                <?php if (isset($preprocessed_image_base64)): ?>
+                <div class="result-card">
+                    <div class="result-header">
+                        <h2 style="color: #111827; font-size: 20px;">Preprocessed Image</h2>
+                    </div>
+                    <div style="text-align: center;">
+                        <img src="data:image/png;base64,<?php echo $preprocessed_image_base64; ?>" 
+                             alt="Preprocessed image for OCR" 
+                             style="max-width: 100%; max-height: 400px; border: 1px solid #ddd; border-radius: 8px;">
+                    </div>
+                </div>
+                <?php endif; ?>
             <?php endif; ?>
 
             <form method="POST" action="" id="ocrForm" enctype="multipart/form-data">
