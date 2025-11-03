@@ -5,11 +5,12 @@ $API_KEY = ''; // Add your API key if needed (leave empty for Ollama)
 
 // Available models
 $AVAILABLE_MODELS = [
+    'gemma3:1b' => 'Gemma 3 (1B)',
     'gemma2:2b' => 'Gemma 2 (2B)',
+    'qwen3:1.7b' => 'Qwen 3 (1.7B)',
     'qwen2.5:1.5b' => 'Qwen 2.5 (1.5B)',
-    'phi3:mini' => 'Phi 3 Mini',
-    'llama3.2:1b' => 'Llama 3.2 (1B)',
-    'gemma:2b' => 'Gemma 1 (2B)'
+    'phi3:mini' => 'Phi 3 Mini (3.8B)',
+    'llama3.2:1b' => 'Llama 3.2 (1B)'
 ];
 
 // Available output languages
@@ -33,29 +34,29 @@ SARCINĂ: Citește raportul și extrage informația patologică principală în 
 
 FORMAT DE IEȘIRE (JSON):
 {
-  \"patologic\": \"da/nu\",
-  \"severitate\": 1-10,
-  \"diagnostic\": \"1-5 cuvinte\"
+  \"pathologic\": \"yes/no\",
+  \"severity\": 1-10,
+  \"diagnostic\": \"1-5 words\"
 }
 
 REGULI:
-- \"patologic\": \"da\" dacă există orice anomalie, altfel \"nu\"
-- \"severitate\": 1=minim, 5=moderat, 10=critic/urgent
+- \"pathologic\": \"yes\" dacă există orice anomalie, altfel \"no\"
+- \"severity\": 1=minim, 5=moderat, 10=critic/urgent
 - \"diagnostic\": maxim 5 cuvinte (ex: \"fractură\", \"pneumonie\", \"nodul pulmonar\")
-- Dacă totul este normal: {\"patologic\": \"nu\", \"severitate\": 0, \"diagnostic\": \"normal\"}
+- Dacă totul este normal: {\"pathologic\": \"no\", \"severity\": 0, \"diagnostic\": \"normal\"}
 - Ignoră erorile de ortografie
 - Răspunde DOAR cu JSON-ul, fără text suplimentar
 
 EXEMPLE:
 
 Raport: \"Opacitate hazilă în câmpul pulmonar stâng mijlociu, posibil reprezentând o consolidare sau infiltrat.\"
-Răspuns: {\"patologic\": \"da\", \"severitate\": 6, \"diagnostic\": \"consolidare pulmonară\"}
+Răspuns: {\"pathologic\": \"yes\", \"severity\": 6, \"diagnostic\": \"consolidare pulmonară\"}
 
 Raport: \"Fără modificări patologice. Inima de dimensiuni normale.\"
-Răspuns: {\"patologic\": \"nu\", \"severitate\": 0, \"diagnostic\": \"normal\"}
+Răspuns: {\"pathologic\": \"no\", \"severity\": 0, \"diagnostic\": \"normal\"}
 
 Raport: \"Fractură deplasată a femurului distal dreapta cu hematom important\"
-Răspuns: {\"patologic\": \"da\", \"severitate\": 8, \"diagnostic\": \"fractură femur\"}";
+Răspuns: {\"pathologic\": \"yes\", \"severity\": 8, \"diagnostic\": \"fractură femur\"}";
 
 $result = null;
 $error = null;
@@ -88,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
         'Content-Type: application/json',
         'Authorization: Bearer ' . $API_KEY
     ]);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 120);
     
     $response = curl_exec($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -404,10 +405,6 @@ function getSeverityLabel($severity) {
         </div>
         
         <div class="content">
-            <div class="config-info">
-                <strong>Configurare:</strong> API @ <?php echo htmlspecialchars($API_ENDPOINT); ?>
-            </div>
-            
             <form method="POST" action="" id="analysisForm">
                 <div class="form-group">
                     <label for="model">Model AI:</label>
@@ -454,20 +451,20 @@ function getSeverityLabel($severity) {
                 <div class="result-card">
                     <div class="result-header">
                         <h2 style="color: #111827; font-size: 20px;">Rezultat Analiză</h2>
-                        <span class="pathology-badge <?php echo $result['patologic'] === 'da' ? 'pathology-yes' : 'pathology-no'; ?>">
-                            <?php echo $result['patologic'] === 'da' ? '⚠️ Patologic' : '✓ Normal'; ?>
+                        <span class="pathology-badge <?php echo $result['pathologic'] === 'yes' ? 'pathology-yes' : 'pathology-no'; ?>">
+                            <?php echo $result['pathologic'] === 'yes' ? '⚠️ Patologic' : '✓ Normal'; ?>
                         </span>
                     </div>
                     
                     <div class="severity-container">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                             <strong style="color: #374151;">Severitate:</strong>
-                            <span style="font-weight: 600; color: <?php echo getSeverityColor($result['severitate']); ?>">
-                                <?php echo getSeverityLabel($result['severitate']); ?> (<?php echo $result['severitate']; ?>/10)
+                            <span style="font-weight: 600; color: <?php echo getSeverityColor($result['severity']); ?>">
+                                <?php echo getSeverityLabel($result['severity']); ?> (<?php echo $result['severity']; ?>/10)
                             </span>
                         </div>
                         <div class="severity-bar">
-                            <div class="severity-fill" style="width: <?php echo $result['severitate'] * 10; ?>%; background: <?php echo getSeverityColor($result['severitate']); ?>;"></div>
+                            <div class="severity-fill" style="width: <?php echo $result['severity'] * 10; ?>%; background: <?php echo getSeverityColor($result['severity']); ?>;"></div>
                         </div>
                     </div>
                     
