@@ -1,0 +1,534 @@
+<?php
+/**
+ * Optical Character Recognition (OCR) Tool
+ * 
+ * A PHP web application that uses AI to perform OCR on uploaded images and extract
+ * text in Markdown format.
+ * 
+ * Features:
+ * - AI-powered OCR of images
+ * - Multiple lightweight AI models support
+ * - Multilingual output (6 languages)
+ * - Web interface with real-time results
+ * - REST API support
+ * - Configurable API endpoint via external config.php
+ * 
+ * Requirements:
+ * - PHP 7.0+
+ * - cURL extension
+ * - JSON extension
+ * - Access to compatible AI API (e.g., Ollama)
+ * 
+ * Usage:
+ * - Web interface: Access via browser
+ * - API endpoint: POST /ocr.php with image data
+ * 
+ * API Usage:
+ * POST /ocr.php
+ * Parameters:
+ * - image (required): Image file to process
+ * - model (optional): AI model to use (default: qwen2.5:1.5b)
+ * - language (optional): Output language (default: ro)
+ * 
+ * Response:
+ * {
+ *   "text": "extracted text in markdown format"
+ * }
+ * 
+ * Configuration:
+ * Create a config.php file with:
+ * - $API_ENDPOINT: AI API endpoint URL
+ * - $API_KEY: API key (if required)
+ * 
+ * @author Costin Stroie <costinstroie@eridu.eu.org>
+ * @version 1.0
+ * @license GPL 3
+ */
+// Configuration - Load from config.php if available, otherwise use defaults
+if (file_exists('config.php')) {
+    include 'config.php';
+} else {
+    // Safe defaults
+    $API_ENDPOINT = 'http://192.168.3.16:11434/v1/chat/completions';
+    $API_KEY = '';
+}
+
+// Available models
+$AVAILABLE_MODELS = [
+    'gemma3:1b' => 'Gemma 3 (1B)',
+    'gemma2:2b' => 'Gemma 2 (2B)',
+    'qwen3:1.7b' => 'Qwen 3 (1.7B)',
+    'qwen2.5:1.5b' => 'Qwen 2.5 (1.5B)',
+    'phi3:mini' => 'Phi 3 Mini (3.8B)',
+    'llama3.2:1b' => 'Llama 3.2 (1B)'
+];
+
+// Available output languages
+$AVAILABLE_LANGUAGES = [
+    'ro' => 'Română',
+    'en' => 'English',
+    'es' => 'Español',
+    'fr' => 'Français',
+    'de' => 'Deutsch',
+    'it' => 'Italiano'
+];
+
+/**
+ * Get selected model and language from POST data or use defaults
+ */
+$MODEL = isset($_POST['model']) ? $_POST['model'] : 'qwen2.5:1.5b';
+$LANGUAGE = isset($_POST['language']) ? $_POST['language'] : 'ro';
+
+/**
+ * Language instructions for the AI model
+ * Maps language codes to natural language instructions
+ */
+$language_instructions = [
+    'ro' => 'Respond in Romanian.',
+    'en' => 'Respond in English.',
+    'es' => 'Responde en español.',
+    'fr' => 'Répondez en français.',
+    'de' => 'Antworte auf Deutsch.',
+    'it' => 'Rispondi in italiano.'
+];
+
+/**
+ * Validate model selection
+ * Falls back to default model if invalid model is selected
+ */
+if (!array_key_exists($MODEL, $AVAILABLE_MODELS)) {
+    $MODEL = 'qwen2.5:1.5b'; // Default to a valid model
+}
+
+/**
+ * Validate language selection
+ * Falls back to Romanian if invalid language is selected
+ */
+if (!array_key_exists($LANGUAGE, $AVAILABLE_LANGUAGES)) {
+    $LANGUAGE = 'ro'; // Default to Romanian
+}
+
+/**
+ * System prompt for the AI model
+ * Contains instructions for performing OCR on images
+ */
+$SYSTEM_PROMPT = "Perform Optical Character Recognition (OCR) on the following image data. The output should be the extracted text formatted in Markdown.
+
+" . $language_instructions[$LANGUAGE];
+
+/**
+ * Application state variables
+ * @var string|null $result Extracted text result
+ * @var string|null $error Error message if any
+ * @var bool $processing Whether analysis is in progress
+ * @var bool $is_api_request Whether request is API call (not web form)
+ */
+$result = null;
+$error = null;
+$processing = false;
+$is_api_request = false;
+
+/**
+ * Handle POST request for image OCR
+ * Processes both web form submissions and API requests
+ * Validates input, calls AI API, and processes response
+ */
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+    $processing = true;
+    $is_api_request = !isset($_POST['submit']); // If no submit button, it's an API request
+    
+    // Validate file upload
+    $image_file = $_FILES['image'];
+    
+    // Check file size (max 5MB)
+    if ($image_file['size'] > 5 * 1024 * 1024) {
+        $error = 'The image file is too large. Maximum 5MB allowed.';
+        $processing = false;
+    }
+    
+    // Check file type
+    $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!in_array($image_file['type'], $allowed_types)) {
+        $error = 'Invalid file type. Only JPEG, PNG, GIF, and WebP images are allowed.';
+        $processing = false;
+    }
+    
+    // Only proceed with API call if validation passed
+    if ($processing) {
+        // Read and encode image file
+        $image_data = file_get_contents($image_file['tmp_name']);
+        if ($image_data === false) {
+            $error = 'Failed to read the uploaded image file.';
+            $processing = false;
+        } else {
+            $base64_image = base64_encode($image_data);
+            $image_url = 'data:' . $image_file['type'] . ';base64,' . $base64_image;
+        }
+    }
+    
+    if ($processing) {
+        // Prepare API request
+        $data = [
+            'model' => $MODEL,
+            'messages' => [
+                ['role' => 'system', 'content' => $SYSTEM_PROMPT],
+                [
+                    'role' => 'user', 
+                    'content' => [
+                        [
+                            'type' => 'image_url',
+                            'image_url' => [
+                                'url' => $image_url
+                            ]
+                        ]
+                    ]
+                ]
+            ],
+            'temperature' => 0.1,
+            'max_tokens' => 2048
+        ];
+        
+        // Make API request
+        $ch = curl_init($API_ENDPOINT);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $API_KEY
+        ]);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 120);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
+        
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        
+        if (curl_errno($ch)) {
+            $error = 'Connection error: ' . curl_error($ch);
+        } elseif ($http_code !== 200) {
+            $error = 'API error: HTTP ' . $http_code;
+        } else {
+            $response_data = json_decode($response, true);
+            
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $error = 'Invalid API response format: ' . json_last_error_msg();
+            } elseif (isset($response_data['choices'][0]['message']['content'])) {
+                $result = trim($response_data['choices'][0]['message']['content']);
+            } else {
+                $error = 'Invalid API response format';
+            }
+        }
+        
+        curl_close($ch);
+        
+        // Return JSON if it's an API request
+        if ($is_api_request) {
+            header('Content-Type: application/json');
+            if ($error) {
+                echo json_encode(['error' => $error]);
+            } else {
+                echo json_encode(['text' => $result]);
+            }
+            exit;
+        }
+    }
+}
+
+/**
+ * Get file size in human readable format
+ * 
+ * @param int $bytes File size in bytes
+ * @return string Human readable file size
+ */
+function formatFileSize($bytes) {
+    $units = ['B', 'KB', 'MB', 'GB'];
+    $bytes = max($bytes, 0);
+    $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+    $pow = min($pow, count($units) - 1);
+    $bytes /= pow(1024, $pow);
+    return round($bytes, 2) . ' ' . $units[$pow];
+}
+?>
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image OCR Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+        
+        input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="file"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn-primary {
+            width: 100%;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+            box-shadow: 0 10px 20px rgba(107, 114, 128, 0.4);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .result-card {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .error {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #dc2626;
+        }
+        
+        .file-info {
+            background: #eff6ff;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #1e40af;
+            margin-top: 8px;
+        }
+        
+        .markdown-result {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📷 Image OCR Tool</h1>
+            <p>AI-powered optical character recognition</p>
+        </div>
+
+        <div class="content">
+            <?php if ($error): ?>
+                <div class="error">
+                    <strong>⚠️ Error:</strong> <?php echo htmlspecialchars($error); ?>
+                </div>
+            <?php endif; ?>
+            
+            <?php if ($result): ?>
+                <div class="result-card">
+                    <div class="result-header">
+                        <h2 style="color: #111827; font-size: 20px;">OCR Result</h2>
+                    </div>
+                    
+                    <div class="markdown-result"><?php echo htmlspecialchars($result); ?></div>
+                </div>
+            <?php endif; ?>
+
+            <form method="POST" action="" id="ocrForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="model">AI model:</label>
+                    <select id="model" name="model">
+                        <?php foreach ($AVAILABLE_MODELS as $value => $label): ?>
+                            <option value="<?php echo htmlspecialchars($value); ?>" 
+                                <?php echo ($MODEL === $value) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($label); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="language">Response language:</label>
+                    <select id="language" name="language">
+                        <?php foreach ($AVAILABLE_LANGUAGES as $value => $label): ?>
+                            <option value="<?php echo htmlspecialchars($value); ?>" 
+                                <?php echo ($LANGUAGE === $value) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($label); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="image">Image file:</label>
+                    <input 
+                        type="file" 
+                        id="image" 
+                        name="image" 
+                        accept="image/jpeg,image/png,image/gif,image/webp"
+                        required
+                    >
+                    <div class="file-info">
+                        Supported formats: JPEG, PNG, GIF, WebP. Maximum size: 5MB.
+                    </div>
+                </div>
+                
+                <button type="submit" name="submit" value="1" class="btn btn-primary">
+                    <?php if ($processing && !$result && !$error): ?>
+                        <span class="loading"></span>
+                    <?php endif; ?>
+                    Extract text
+                </button>
+                
+                <button type="button" class="btn btn-secondary" onclick="clearForm()">
+                    🔄 New OCR
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        function clearForm() {
+            document.getElementById('image').value = '';
+            document.getElementById('model').selectedIndex = 0;
+            document.getElementById('language').selectedIndex = 0;
+            // Reload page to clear results
+            window.location.href = window.location.pathname;
+        }
+    </script>
+</body>
+</html>
