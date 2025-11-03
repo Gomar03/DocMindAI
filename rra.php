@@ -259,8 +259,8 @@ function getSeverityColor($severity) {
 function getSeverityLabel($severity) {
     if ($severity == 0) return 'Normal';
     if ($severity <= 3) return 'Minor';
-    if ($severity <= 6) return 'Moderat';
-    if ($severity <= 8) return 'Sever';
+    if ($severity <= 6) return 'Moderate';
+    if ($severity <= 8) return 'Severe';
     return 'Critic';
 }
 ?>
