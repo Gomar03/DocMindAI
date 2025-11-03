@@ -621,7 +621,7 @@ function preprocessImageForOCR($image_path) {
                     <?php if ($processing && !$result && !$error): ?>
                         <span class="loading"></span>
                     <?php endif; ?>
-                    Extract text
+                    📄 Extract text
                 </button>
                 
                 <button type="button" class="btn btn-secondary" onclick="clearForm()">
