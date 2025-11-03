@@ -113,7 +113,7 @@ if (!array_key_exists($LANGUAGE, $AVAILABLE_LANGUAGES)) {
  * System prompt for the AI model
  * Contains instructions for performing OCR on images
  */
-$SYSTEM_PROMPT = "Perform Optical Character Recognition (OCR) on the following image data. The output should be the extracted text formatted in Markdown.
+$SYSTEM_PROMPT = "Perform Optical Character Recognition (OCR) on the following image data. Extract and return ONLY the text you see in the image. Do not add any explanations, introductions, or markdown formatting. Return only the raw text content.
 
 " . $language_instructions[$LANGUAGE];
 
@@ -227,6 +227,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image']) && $_FILES[
                 $error = 'Invalid API response format: ' . json_last_error_msg();
             } elseif (isset($response_data['choices'][0]['message']['content'])) {
                 $result = trim($response_data['choices'][0]['message']['content']);
+                // Remove markdown code fences if present
+                $result = preg_replace('/^```(?:markdown)?\s*(.*?)\s*```$/s', '$1', $result);
             } else {
                 $error = 'Invalid API response format';
             }
