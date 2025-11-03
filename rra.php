@@ -1,7 +1,12 @@
 <?php
-// Configuration
-$API_ENDPOINT = 'http://192.168.3.16:11434/v1/chat/completions'; // Change to your API endpoint
-$API_KEY = ''; // Add your API key if needed (leave empty for Ollama)
+// Configuration - Load from config.php if available, otherwise use defaults
+if (file_exists('config.php')) {
+    include 'config.php';
+} else {
+    // Safe defaults
+    $API_ENDPOINT = 'http://192.168.3.16:11434/v1/chat/completions';
+    $API_KEY = '';
+}
 
 // Available models
 $AVAILABLE_MODELS = [
