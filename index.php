@@ -29,7 +29,7 @@ $LANGUAGE = isset($_POST['language']) ? $_POST['language'] : 'ro';
 
 // System prompt with language support
 $language_instructions = [
-    'ro' => 'Răspunde în limba română.',
+    'ro' => 'Respond in Romanian.',
     'en' => 'Respond in English.',
     'es' => 'Responde en español.',
     'fr' => 'Répondez en français.',
@@ -48,37 +48,37 @@ if (!array_key_exists($LANGUAGE, $AVAILABLE_LANGUAGES)) {
 }
 
 // System prompt
-$SYSTEM_PROMPT = "Ești un asistent medical care analizează rapoarte radiologice.
+$SYSTEM_PROMPT = "You are a medical assistant analyzing radiology reports.
 
-SARCINĂ: Citește raportul și extrage informația patologică principală în format JSON.
+TASK: Read the report and extract the main pathological information in JSON format.
 
 " . $language_instructions[$LANGUAGE] . "
 
-FORMAT DE IEȘIRE (JSON):
+OUTPUT FORMAT (JSON):
 {
   \"pathologic\": \"yes/no\",
   \"severity\": 1-10,
   \"diagnostic\": \"1-5 words\"
 }
 
-REGULI:
-- \"pathologic\": \"yes\" dacă există orice anomalie, altfel \"no\"
-- \"severity\": 1=minim, 5=moderat, 10=critic/urgent
-- \"diagnostic\": maxim 5 cuvinte (ex: \"fractură\", \"pneumonie\", \"nodul pulmonar\")
-- Dacă totul este normal: {\"pathologic\": \"no\", \"severity\": 0, \"diagnostic\": \"normal\"}
-- Ignoră erorile de ortografie
-- Răspunde DOAR cu JSON-ul, fără text suplimentar
+RULES:
+- \"pathologic\": \"yes\" if any anomaly exists, otherwise \"no\"
+- \"severity\": 1=minimal, 5=moderate, 10=critical/urgent
+- \"diagnostic\": maximum 5 words (e.g., \"fracture\", \"pneumonia\", \"lung nodule\")
+- If everything is normal: {\"pathologic\": \"no\", \"severity\": 0, \"diagnostic\": \"normal\"}
+- Ignore spelling errors
+- Respond ONLY with the JSON, without additional text
 
-EXEMPLE:
+EXAMPLES:
 
-Raport: \"Opacitate hazilă în câmpul pulmonar stâng mijlociu, posibil reprezentând o consolidare sau infiltrat.\"
-Răspuns: {\"pathologic\": \"yes\", \"severity\": 6, \"diagnostic\": \"consolidare pulmonară\"}
+Report: \"Hazy opacity in the left mid lung field, possibly representing consolidation or infiltrate.\"
+Response: {\"pathologic\": \"yes\", \"severity\": 6, \"diagnostic\": \"pulmonary consolidation\"}
 
-Raport: \"Fără modificări patologice. Inima de dimensiuni normale.\"
-Răspuns: {\"pathologic\": \"no\", \"severity\": 0, \"diagnostic\": \"normal\"}
+Report: \"No pathological changes. Heart of normal size.\"
+Response: {\"pathologic\": \"no\", \"severity\": 0, \"diagnostic\": \"normal\"}
 
-Raport: \"Fractură deplasată a femurului distal dreapta cu hematom important\"
-Răspuns: {\"pathologic\": \"yes\", \"severity\": 8, \"diagnostic\": \"fractură femur\"}";
+Report: \"Displaced fracture of the right distal femur with significant hematoma\"
+Response: {\"pathologic\": \"yes\", \"severity\": 8, \"diagnostic\": \"femur fracture\"}";
 
 $result = null;
 $error = null;
@@ -95,12 +95,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
     
     // Validate report length (prevent extremely large inputs)
     if (strlen($report) > 10000) {
-        $error = 'Raportul este prea lung. Maxim 10.000 caractere permise.';
+        $error = 'The report is too long. Maximum 10,000 characters allowed.';
         $processing = false;
     } 
     // Validate report is not empty after trimming
     elseif (empty($report)) {
-        $error = 'Raportul nu poate fi gol.';
+        $error = 'The report cannot be empty.';
         $processing = false;
     }
     
@@ -452,29 +452,29 @@ function getSeverityLabel($severity) {
 <body>
     <div class="container">
         <div class="header">
-            <h1>🏥 Analizor Rapoarte Radiologice</h1>
-            <p>Analiză automată cu AI a rapoartelor medicale</p>
+            <h1>🏥 Radiology Report Analyzer</h1>
+            <p>AI-powered automatic analysis of medical reports</p>
         </div>
 
         <div class="content">
             <?php if ($error): ?>
                 <div class="error">
-                    <strong>⚠️ Eroare:</strong> <?php echo htmlspecialchars($error); ?>
+                    <strong>⚠️ Error:</strong> <?php echo htmlspecialchars($error); ?>
                 </div>
             <?php endif; ?>
             
             <?php if ($result): ?>
                 <div class="result-card">
                     <div class="result-header">
-                        <h2 style="color: #111827; font-size: 20px;">Rezultat Analiză</h2>
+                        <h2 style="color: #111827; font-size: 20px;">Analysis Result</h2>
                         <span class="pathology-badge <?php echo $result['pathologic'] === 'yes' ? 'pathology-yes' : 'pathology-no'; ?>">
-                            <?php echo $result['pathologic'] === 'yes' ? '⚠️ Patologic' : '✓ Normal'; ?>
+                            <?php echo $result['pathologic'] === 'yes' ? '⚠️ Pathological' : '✓ Normal'; ?>
                         </span>
                     </div>
                     
                     <div class="severity-container">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <strong style="color: #374151;">Severitate:</strong>
+                            <strong style="color: #374151;">Severity:</strong>
                             <span style="font-weight: 600; color: <?php echo getSeverityColor($result['severity']); ?>">
                                 <?php echo getSeverityLabel($result['severity']); ?> (<?php echo $result['severity']; ?>/10)
                             </span>
@@ -485,7 +485,7 @@ function getSeverityLabel($severity) {
                     </div>
                     
                     <div class="diagnostic-box">
-                        <div class="diagnostic-label">Diagnostic</div>
+                        <div class="diagnostic-label">Diagnosis</div>
                         <div class="diagnostic-text"><?php echo htmlspecialchars($result['diagnostic']); ?></div>
                     </div>
                 </div>
@@ -493,7 +493,7 @@ function getSeverityLabel($severity) {
 
             <form method="POST" action="" id="analysisForm">
                 <div class="form-group">
-                    <label for="model">Model AI:</label>
+                    <label for="model">AI Model:</label>
                     <select id="model" name="model">
                         <?php foreach ($AVAILABLE_MODELS as $value => $label): ?>
                             <option value="<?php echo htmlspecialchars($value); ?>" 
@@ -505,7 +505,7 @@ function getSeverityLabel($severity) {
                 </div>
                 
                 <div class="form-group">
-                    <label for="language">Limba răspuns / Output Language:</label>
+                    <label for="language">Response Language / Limba răspuns:</label>
                     <select id="language" name="language">
                         <?php foreach ($AVAILABLE_LANGUAGES as $value => $label): ?>
                             <option value="<?php echo htmlspecialchars($value); ?>" 
@@ -517,13 +517,13 @@ function getSeverityLabel($severity) {
                 </div>
                 
                 <div class="form-group">
-                    <label for="report">Raport Radiologic (Română):</label>
+                    <label for="report">Radiology Report:</label>
                     <textarea 
                         id="report" 
                         name="report" 
                         rows="8" 
                         required
-                        placeholder="Introduceți raportul radiologic aici...&#10;&#10;Exemplu: Opacitate hazilă în câmpul pulmonar stâng mijlociu, posibil reprezentând o consolidare sau infiltrat. Fără efuziune pleurală, pneumotorax sau pneumoperitoneu."
+                        placeholder="Enter the radiology report here...&#10;&#10;Example: Hazy opacity in the left mid lung field, possibly representing consolidation or infiltrate. No pleural effusion, pneumothorax or pneumoperitoneum."
                     ><?php echo isset($_POST['report']) ? htmlspecialchars($_POST['report']) : ''; ?></textarea>
                 </div>
                 
@@ -531,11 +531,11 @@ function getSeverityLabel($severity) {
                     <?php if ($processing && !$result && !$error): ?>
                         <span class="loading"></span>
                     <?php endif; ?>
-                    Analizează Raport
+                    Analyze Report
                 </button>
                 
                 <button type="button" class="btn btn-secondary" onclick="clearForm()">
-                    🔄 Analiză Nouă
+                    🔄 New Analysis
                 </button>
             </form>
         </div>
