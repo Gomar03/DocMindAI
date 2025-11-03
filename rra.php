@@ -237,7 +237,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
 }
 } // Close the if ($processing) block
 
-// Helper function to get severity color
+/**
+ * Get the color associated with a severity level
+ * 
+ * @param int $severity Severity level (0-10)
+ * @return string Hex color code
+ */
 function getSeverityColor($severity) {
     if ($severity == 0) return '#10b981'; // green
     if ($severity <= 3) return '#3b82f6'; // blue
@@ -245,7 +250,12 @@ function getSeverityColor($severity) {
     return '#ef4444'; // red
 }
 
-// Helper function to get severity label
+/**
+ * Get the label associated with a severity level
+ * 
+ * @param int $severity Severity level (0-10)
+ * @return string Severity label
+ */
 function getSeverityLabel($severity) {
     if ($severity == 0) return 'Normal';
     if ($severity <= 3) return 'Minor';
