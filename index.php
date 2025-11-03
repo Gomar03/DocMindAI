@@ -1,8 +1,19 @@
 <?php
 // Configuration
-$API_ENDPOINT = 'http://192.168.3.16:11434/v1/chat/completions'; // Change to your API endpoint
+$API_ENDPOINT = 'http://localhost:11434/v1/chat/completions'; // Change to your API endpoint
 $API_KEY = ''; // Add your API key if needed (leave empty for Ollama)
-$MODEL = 'gemma3:1b'; // Change to your model
+
+// Available models
+$AVAILABLE_MODELS = [
+    'gemma2:2b' => 'Gemma 2 (2B)',
+    'qwen2.5:1.5b' => 'Qwen 2.5 (1.5B)',
+    'phi3:mini' => 'Phi 3 Mini',
+    'llama3.2:1b' => 'Llama 3.2 (1B)',
+    'gemma:2b' => 'Gemma 1 (2B)'
+];
+
+// Get selected model
+$MODEL = isset($_POST['model']) ? $_POST['model'] : 'gemma2:2b';
 
 // System prompt
 $SYSTEM_PROMPT = "Ești un asistent medical care analizează rapoarte radiologice în limba română.
@@ -38,10 +49,12 @@ Răspuns: {\"patologic\": \"da\", \"severitate\": 8, \"diagnostic\": \"fractură
 $result = null;
 $error = null;
 $processing = false;
+$is_api_request = false;
 
 // Handle POST request
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
     $processing = true;
+    $is_api_request = !isset($_POST['submit']); // If no submit button, it's an API request
     $report = trim($_POST['report']);
     
     // Prepare API request
@@ -64,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
         'Content-Type: application/json',
         'Authorization: Bearer ' . $API_KEY
     ]);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 60);
     
     $response = curl_exec($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -96,6 +109,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
     }
     
     curl_close($ch);
+    
+    // Return JSON if it's an API request
+    if ($is_api_request) {
+        header('Content-Type: application/json');
+        if ($error) {
+            echo json_encode(['error' => $error]);
+        } else {
+            echo json_encode($result);
+        }
+        exit;
+    }
 }
 
 // Helper function to get severity color
@@ -195,6 +219,23 @@ function getSeverityLabel($severity) {
             border-color: #667eea;
         }
         
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
         .btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -205,7 +246,21 @@ function getSeverityLabel($severity) {
             font-weight: 600;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn-primary {
             width: 100%;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+            box-shadow: 0 10px 20px rgba(107, 114, 128, 0.4);
         }
         
         .btn:hover {
@@ -339,10 +394,22 @@ function getSeverityLabel($severity) {
         
         <div class="content">
             <div class="config-info">
-                <strong>Configurare:</strong> <?php echo htmlspecialchars($MODEL); ?> @ <?php echo htmlspecialchars($API_ENDPOINT); ?>
+                <strong>Configurare:</strong> API @ <?php echo htmlspecialchars($API_ENDPOINT); ?>
             </div>
             
-            <form method="POST" action="">
+            <form method="POST" action="" id="analysisForm">
+                <div class="form-group">
+                    <label for="model">Model AI:</label>
+                    <select id="model" name="model">
+                        <?php foreach ($AVAILABLE_MODELS as $value => $label): ?>
+                            <option value="<?php echo htmlspecialchars($value); ?>" 
+                                <?php echo ($MODEL === $value) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($label); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                
                 <div class="form-group">
                     <label for="report">Raport Radiologic (Română):</label>
                     <textarea 
@@ -354,19 +421,16 @@ function getSeverityLabel($severity) {
                     ><?php echo isset($_POST['report']) ? htmlspecialchars($_POST['report']) : ''; ?></textarea>
                 </div>
                 
-                <div style="display: flex; gap: 10px;">
-                    <button type="submit" class="btn" style="flex: 1;">
-                        <?php if ($processing && !$result && !$error): ?>
-                            <span class="loading"></span>
-                        <?php endif; ?>
-                        Analizează Raport
-                    </button>
-                    <button type="button" class="btn" onclick="document.getElementById('report').value=''; 
-                        <?php if ($result || $error): ?>window.location.href='<?php echo $_SERVER['PHP_SELF']; ?>';<?php endif; ?>" 
-                        style="background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%); flex: 1;">
-                        Șterge Formular
-                    </button>
-                </div>
+                <button type="submit" name="submit" value="1" class="btn btn-primary">
+                    <?php if ($processing && !$result && !$error): ?>
+                        <span class="loading"></span>
+                    <?php endif; ?>
+                    Analizează Raport
+                </button>
+                
+                <button type="button" class="btn btn-secondary" onclick="clearForm()">
+                    🔄 Analiză Nouă
+                </button>
             </form>
             
             <?php if ($error): ?>
@@ -404,5 +468,14 @@ function getSeverityLabel($severity) {
             <?php endif; ?>
         </div>
     </div>
+    
+    <script>
+        function clearForm() {
+            document.getElementById('report').value = '';
+            document.getElementById('model').selectedIndex = 0;
+            // Reload page to clear results
+            window.location.href = window.location.pathname;
+        }
+    </script>
 </body>
 </html>
