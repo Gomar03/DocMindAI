@@ -1,6 +1,6 @@
 <?php
 // Configuration
-$API_ENDPOINT = 'http://localhost:11434/v1/chat/completions'; // Change to your API endpoint
+$API_ENDPOINT = 'http://192.168.3.16:11434/v1/chat/completions'; // Change to your API endpoint
 $API_KEY = ''; // Add your API key if needed (leave empty for Ollama)
 
 // Available models
