@@ -46,6 +46,9 @@
  * @version 1.0
  * @license GPL 3
  */
+// Include common functions
+include 'common.php';
+
 // Configuration - Load from config.php if available, otherwise use defaults
 if (file_exists('config.php')) {
     include 'config.php';
@@ -262,33 +265,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
     }
 }
 } // Close the if ($processing) block
-
-/**
- * Get the color associated with a severity level
- * 
- * @param int $severity Severity level (0-10)
- * @return string Hex color code
- */
-function getSeverityColor($severity) {
-    if ($severity == 0) return '#10b981'; // green
-    if ($severity <= 3) return '#3b82f6'; // blue
-    if ($severity <= 6) return '#f59e0b'; // orange
-    return '#ef4444'; // red
-}
-
-/**
- * Get the label associated with a severity level
- * 
- * @param int $severity Severity level (0-10)
- * @return string Severity label
- */
-function getSeverityLabel($severity) {
-    if ($severity == 0) return 'Normal';
-    if ($severity <= 3) return 'Minor';
-    if ($severity <= 6) return 'Moderate';
-    if ($severity <= 8) return 'Severe';
-    return 'Critic';
-}
 ?>
 <!DOCTYPE html>
 <html lang="ro">
