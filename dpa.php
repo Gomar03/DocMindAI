@@ -85,8 +85,8 @@ $AVAILABLE_LANGUAGES = [
 /**
  * Get selected model and language from POST data, cookies, or use defaults
  */
-$MODEL = isset($_POST['model']) ? $_POST['model'] : (isset($_COOKIE['dpa_last_model']) ? $_COOKIE['dpa_last_model'] : 'qwen2.5:1.5b');
-$LANGUAGE = isset($_POST['language']) ? $_POST['language'] : (isset($_COOKIE['dpa_last_language']) ? $_COOKIE['dpa_last_language'] : 'ro');
+$MODEL = isset($_POST['model']) ? $_POST['model'] : (isset($_COOKIE['dpa-model']) ? $_COOKIE['dpa-model'] : 'qwen2.5:1.5b');
+$LANGUAGE = isset($_POST['language']) ? $_POST['language'] : (isset($_COOKIE['dpa-language']) ? $_COOKIE['dpa-language'] : 'ro');
 
 /**
  * Language instructions for the AI model
@@ -258,8 +258,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
     curl_close($ch);
     
     // Set cookies with the selected model and language
-    setcookie('dpa_last_model', $MODEL, time() + (30 * 24 * 60 * 60), '/'); // 30 days
-    setcookie('dpa_last_language', $LANGUAGE, time() + (30 * 24 * 60 * 60), '/'); // 30 days
+    setcookie('dpa-model', $MODEL, time() + (30 * 24 * 60 * 60), '/'); // 30 days
+    setcookie('dpa-language', $LANGUAGE, time() + (30 * 24 * 60 * 60), '/'); // 30 days
     
     // Return JSON if it's an API request
     if ($is_api_request) {
