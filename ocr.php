@@ -56,6 +56,9 @@ if (file_exists('config.php')) {
     $API_KEY = '';
 }
 
+// Create chat endpoint URL
+$API_ENDPOINT_CHAT = $API_ENDPOINT;
+
 // Fetch available models from API
 $AVAILABLE_MODELS = getAvailableModels($API_ENDPOINT, $API_KEY);
 
@@ -209,7 +212,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image']) && $_FILES[
         ];
         
         // Make API request
-        $ch = curl_init($API_ENDPOINT);
+        $ch = curl_init($API_ENDPOINT_CHAT);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
