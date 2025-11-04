@@ -7,7 +7,7 @@
  * 
  * Features:
  * - AI-powered analysis of patient discharge papers
- * - Multiple lightweight AI models support
+ * - Multiple lightweight AI models support (filtered for free models)
  * - Multilingual output (6 languages)
  * - Web interface with real-time results
  * - REST API support
