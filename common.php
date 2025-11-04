@@ -144,11 +144,7 @@ function preprocessImageForOCR($image_path) {
 function getAvailableModels($api_endpoint, $api_key = '') {
     // Extract base URL from endpoint
     $parsed_url = parse_url($api_endpoint);
-    $base_url = $parsed_url['scheme'] . '://' . $parsed_url['host'];
-    if (isset($parsed_url['port'])) {
-        $base_url .= ':' . $parsed_url['port'];
-    }
-    $models_url = $base_url . '/v1/models';
+    $models_url = $base_url . '/models';
     
     // Make API request
     $ch = curl_init($models_url);
