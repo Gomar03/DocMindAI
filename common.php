@@ -133,4 +133,64 @@ function preprocessImageForOCR($image_path) {
     
     return $success ? $temp_path : false;
 }
+
+/**
+ * Fetch available models from the LLM server API
+ * 
+ * @param string $api_endpoint The API endpoint URL
+ * @param string $api_key The API key (if required)
+ * @return array List of available models
+ */
+function getAvailableModels($api_endpoint, $api_key = '') {
+    // Extract base URL from endpoint
+    $parsed_url = parse_url($api_endpoint);
+    $base_url = $parsed_url['scheme'] . '://' . $parsed_url['host'];
+    if (isset($parsed_url['port'])) {
+        $base_url .= ':' . $parsed_url['port'];
+    }
+    $models_url = $base_url . '/api/tags';
+    
+    // Make API request
+    $ch = curl_init($models_url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . $api_key
+    ]);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
+    
+    $response = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    
+    if (curl_errno($ch) || $http_code !== 200) {
+        curl_close($ch);
+        // Return default models if API call fails
+        return [];
+    }
+    
+    curl_close($ch);
+    
+    $response_data = json_decode($response, true);
+    
+    if (json_last_error() !== JSON_ERROR_NONE || !isset($response_data['models'])) {
+        return [];
+    }
+    
+    $models = [];
+    foreach ($response_data['models'] as $model) {
+        if (isset($model['name'])) {
+            // For vision models, we'll use a more user-friendly name
+            $name = $model['name'];
+            if (strpos($name, 'vision') !== false || strpos($name, 'vl') !== false) {
+                $models[$name] = ucfirst(str_replace(':', ' ', $name)) . ' (Vision)';
+            } else {
+                $models[$name] = ucfirst(str_replace(':', ' ', $name));
+            }
+        }
+    }
+    
+    return $models;
+}
 ?>

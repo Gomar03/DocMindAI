@@ -58,15 +58,20 @@ if (file_exists('config.php')) {
     $API_KEY = '';
 }
 
-// Available models
-$AVAILABLE_MODELS = [
-    'gemma3:1b' => 'Gemma 3 (1B)',
-    'gemma2:2b' => 'Gemma 2 (2B)',
-    'qwen3:1.7b' => 'Qwen 3 (1.7B)',
-    'qwen2.5:1.5b' => 'Qwen 2.5 (1.5B)',
-    'phi3:mini' => 'Phi 3 Mini (3.8B)',
-    'llama3.2:1b' => 'Llama 3.2 (1B)'
-];
+// Fetch available models from API
+$AVAILABLE_MODELS = getAvailableModels($API_ENDPOINT, $API_KEY);
+
+// If API call fails, use default models
+if (empty($AVAILABLE_MODELS)) {
+    $AVAILABLE_MODELS = [
+        'gemma3:1b' => 'Gemma 3 (1B)',
+        'gemma2:2b' => 'Gemma 2 (2B)',
+        'qwen3:1.7b' => 'Qwen 3 (1.7B)',
+        'qwen2.5:1.5b' => 'Qwen 2.5 (1.5B)',
+        'phi3:mini' => 'Phi 3 Mini (3.8B)',
+        'llama3.2:1b' => 'Llama 3.2 (1B)'
+    ];
+}
 
 // Available output languages
 $AVAILABLE_LANGUAGES = [
