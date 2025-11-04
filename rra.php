@@ -322,7 +322,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
                     <?php if ($processing && !$result && !$error): ?>
                         <span class="loading"></span>
                     <?php endif; ?>
-                    Analyze report
+                    🔍 Analyze report
                 </button>
                 
                 <button type="button" class="btn btn-secondary" onclick="clearForm()">
