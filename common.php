@@ -258,9 +258,10 @@ function extractImagesFromPDF($pdf_path) {
  * 
  * @param string $api_endpoint The API endpoint URL
  * @param string $api_key The API key (if required)
+ * @param string $filter_regex Regular expression to filter models (optional)
  * @return array List of available models
  */
-function getAvailableModels($api_endpoint, $api_key = '') {
+function getAvailableModels($api_endpoint, $api_key = '', $filter_regex = '') {
     $models_url = $api_endpoint . '/models';
     
     // Make API request
@@ -294,6 +295,11 @@ function getAvailableModels($api_endpoint, $api_key = '') {
     $models = [];
     foreach ($response_data['data'] as $model) {
         if (isset($model['id'])) {
+            // Apply filter if provided
+            if ($filter_regex !== '' && !preg_match($filter_regex, $model['id'])) {
+                continue;
+            }
+            
             // For vision models, we'll use a more user-friendly name
             $name = $model['id'];
             if (strpos($name, 'vision') !== false || strpos($name, 'vl') !== false) {
