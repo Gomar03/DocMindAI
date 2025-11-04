@@ -191,6 +191,9 @@ function getAvailableModels($api_endpoint, $api_key = '') {
         }
     }
     
+    // Sort models alphabetically by key (model name)
+    ksort($models);
+    
     return $models;
 }
 ?>
