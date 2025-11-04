@@ -132,13 +132,13 @@ OUTPUT FORMAT (JSON):
 {
   \"pathologic\": \"yes/no\",
   \"severity\": 0-10,
-  \"diagnostic\": \"1-5 words\"
+  \"diagnostic\": \"summary paragraph\"
 }
 
 RULES:
 - \"pathologic\": \"yes\" if the discharge paper contains any findings relevant to radiology
 - \"severity\": 0=normal, 1=minimal, 5=moderate, 10=critical/urgent
-- \"diagnostic\": maximum 5 words summarizing radiology-relevant information
+- \"diagnostic\": one paragraph summarizing radiology-relevant information
 - Focus on findings, conditions, treatments affecting radiology
 - Ignore non-radiology relevant information
 - Respond ONLY with the JSON, without additional text
@@ -146,13 +146,13 @@ RULES:
 EXAMPLES:
 
 Discharge: \"Patient discharged after treatment for pneumonia. Chest X-ray shows resolved infiltrate.\"
-Response: {\"pathologic\": \"yes\", \"severity\": 2, \"diagnostic\": \"resolved pneumonia\"}
+Response: {\"pathologic\": \"yes\", \"severity\": 2, \"diagnostic\": \"Patient treated for pneumonia with resolved infiltrate on chest X-ray. No current radiological concerns.\"}
 
 Discharge: \"Post-operative knee surgery. X-ray shows proper hardware placement.\"
-Response: {\"pathologic\": \"no\", \"severity\": 0, \"diagnostic\": \"normal post-op\"}
+Response: {\"pathologic\": \"no\", \"severity\": 0, \"diagnostic\": \"Post-operative knee surgery with proper hardware placement confirmed on X-ray. Normal findings.\"}
 
 Discharge: \"Acute appendicitis, laparoscopic appendectomy. Post-op CT showed small abscess.\"
-Response: {\"pathologic\": \"yes\", \"severity\": 5, \"diagnostic\": \"post-op abscess\"}";
+Response: {\"pathologic\": \"yes\", \"severity\": 5, \"diagnostic\": \"Post-operative appendectomy patient with small abscess identified on CT scan requiring monitoring.\"}";
 
 /**
  * Application state variables
