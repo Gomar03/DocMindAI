@@ -126,8 +126,6 @@ $SYSTEM_PROMPT = "You are a medical assistant analyzing patient discharge papers
 
 TASK: Read the discharge paper and summarize its content for radiology use. Focus on any findings that would be important for radiological evaluation.
 
-" . $language_instructions[$LANGUAGE] . "
-
 OUTPUT FORMAT (JSON):
 {
   \"pathologic\": \"yes/no\",
@@ -153,6 +151,8 @@ Response: {\"pathologic\": \"no\", \"severity\": 0, \"diagnostic\": \"Post-opera
 
 Discharge: \"Acute appendicitis, laparoscopic appendectomy. Post-op CT showed small abscess.\"
 Response: {\"pathologic\": \"yes\", \"severity\": 5, \"diagnostic\": \"Post-operative appendectomy patient with small abscess identified on CT scan requiring monitoring.\"}";
+
+$SYSTEM_PROMPT .= "\n" . $language_instructions[$LANGUAGE];
 
 /**
  * Application state variables
