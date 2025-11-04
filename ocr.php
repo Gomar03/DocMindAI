@@ -141,21 +141,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image']) && $_FILES[
     if ($processing) {
         // Handle PDF files
         if ($image_file['type'] === 'application/pdf') {
-            // Extract images from PDF
-            $images = extractImagesFromPDF($image_file['tmp_name']);
-            if ($images === false || empty($images)) {
-                $error = 'Failed to extract images from PDF or PDF contains no images.';
+            // Check if Imagick extension is available
+            if (!extension_loaded('imagick')) {
+                $error = 'PDF processing requires the ImageMagick extension which is not installed or enabled.';
                 $processing = false;
             } else {
-                // Use the first image from PDF for OCR
-                $temp_image_path = tempnam(sys_get_temp_dir(), 'pdf_') . '.png';
-                if (file_put_contents($temp_image_path, $images[0]) === false) {
-                    $error = 'Failed to save extracted PDF image.';
+                // Extract images from PDF
+                $images = extractImagesFromPDF($image_file['tmp_name']);
+                if ($images === false || empty($images)) {
+                    $error = 'Failed to extract images from PDF or PDF contains no images.';
                     $processing = false;
                 } else {
-                    // Preprocess the extracted image
-                    $preprocessed_image_path = preprocessImageForOCR($temp_image_path);
-                    unlink($temp_image_path); // Clean up temporary file
+                    // Use the first image from PDF for OCR
+                    $temp_image_path = tempnam(sys_get_temp_dir(), 'pdf_') . '.png';
+                    if (file_put_contents($temp_image_path, $images[0]) === false) {
+                        $error = 'Failed to save extracted PDF image.';
+                        $processing = false;
+                    } else {
+                        // Preprocess the extracted image
+                        $preprocessed_image_path = preprocessImageForOCR($temp_image_path);
+                        unlink($temp_image_path); // Clean up temporary file
+                    }
                 }
             }
         } else {
