@@ -101,11 +101,9 @@ if (!array_key_exists($LANGUAGE, $AVAILABLE_LANGUAGES)) {
  * System prompt for the AI model
  * Contains instructions for performing OCR on images
  */
-// Include the language instructions from common.php
-global $language_instructions;
 $SYSTEM_PROMPT = "Perform Optical Character Recognition (OCR) on the following image data. Extract and return ONLY the text you see in the image, formatted appropriately in Markdown. Do not add any explanations or introductions. Return only the Markdown formatted text content.
 
-" . $language_instructions[$LANGUAGE];
+" . getLanguageInstruction($LANGUAGE);
 
 /**
  * Application state variables

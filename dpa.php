@@ -129,9 +129,7 @@ Response: {\"pathologic\": \"no\", \"severity\": 0, \"diagnostic\": \"Post-opera
 Discharge: \"Acute appendicitis, laparoscopic appendectomy. Post-op CT showed small abscess.\"
 Response: {\"pathologic\": \"yes\", \"severity\": 5, \"diagnostic\": \"Post-operative appendectomy patient with small abscess identified on CT scan requiring monitoring.\"}";
 
-// Include the language instructions from common.php
-global $language_instructions;
-$SYSTEM_PROMPT .= "\n" . $language_instructions[$LANGUAGE];
+$SYSTEM_PROMPT .= "\n" . getLanguageInstruction($LANGUAGE);
 
 /**
  * Application state variables

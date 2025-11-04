@@ -22,17 +22,23 @@ $AVAILABLE_LANGUAGES = [
 ];
 
 /**
- * Language instructions for the AI model
- * Maps language codes to natural language instructions
+ * Get language instruction for the AI model
+ * 
+ * @param string $language Language code
+ * @return string Language instruction
  */
-$language_instructions = [
-    'ro' => 'Respond in Romanian.',
-    'en' => 'Respond in English.',
-    'es' => 'Responde en español.',
-    'fr' => 'Répondez en français.',
-    'de' => 'Antworte auf Deutsch.',
-    'it' => 'Rispondi in italiano.'
-];
+function getLanguageInstruction($language) {
+    $language_instructions = [
+        'ro' => 'Respond in Romanian.',
+        'en' => 'Respond in English.',
+        'es' => 'Responde en español.',
+        'fr' => 'Répondez en français.',
+        'de' => 'Antworte auf Deutsch.',
+        'it' => 'Rispondi in italiano.'
+    ];
+    
+    return isset($language_instructions[$language]) ? $language_instructions[$language] : $language_instructions['ro'];
+}
 
 /**
  * Get the color associated with a severity level

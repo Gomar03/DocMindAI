@@ -103,13 +103,11 @@ if (!array_key_exists($LANGUAGE, $AVAILABLE_LANGUAGES)) {
  * Contains instructions for analyzing radiology reports and returning structured JSON
  * Includes language-specific instructions and examples
  */
-// Include the language instructions from common.php
-global $language_instructions;
 $SYSTEM_PROMPT = "You are a medical assistant analyzing radiology reports.
 
 TASK: Read the report and extract the main pathological information in JSON format.
 
-" . $language_instructions[$LANGUAGE] . "
+" . getLanguageInstruction($LANGUAGE) . "
 
 OUTPUT FORMAT (JSON):
 {
