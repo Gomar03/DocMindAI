@@ -329,7 +329,7 @@ function scrapeUrl($url) {
                     <?php if ($processing && !$result && !$error): ?>
                         <span class="loading"></span>
                     <?php endif; ?>
-                    📄 Web scrap
+                    🔍 Parse Content
                 </button>
                 
                 <button type="button" class="btn btn-secondary" onclick="clearForm()">
