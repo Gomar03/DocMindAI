@@ -322,6 +322,17 @@ function scrapeUrl($url) {
                 </div>
                 
                 <div class="form-group">
+                    <label for="format">Output format:</label>
+                    <select id="format" name="format">
+                        <?php foreach ($AVAILABLE_FORMATS as $value => $label): ?>
+                            <option value="<?php echo htmlspecialchars($value); ?>" <?php echo ($FORMAT === $value) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($label); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                
+                <div class="form-group">
                     <label for="model">AI model:</label>
                     <select id="model" name="model">
                         <?php foreach ($AVAILABLE_MODELS as $value => $label): ?>
@@ -337,17 +348,6 @@ function scrapeUrl($url) {
                     <select id="language" name="language">
                         <?php foreach ($AVAILABLE_LANGUAGES as $value => $label): ?>
                             <option value="<?php echo htmlspecialchars($value); ?>" <?php echo ($LANGUAGE === $value) ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($label); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="format">Output format:</label>
-                    <select id="format" name="format">
-                        <?php foreach ($AVAILABLE_FORMATS as $value => $label): ?>
-                            <option value="<?php echo htmlspecialchars($value); ?>" <?php echo ($FORMAT === $value) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($label); ?>
                             </option>
                         <?php endforeach; ?>
