@@ -149,18 +149,97 @@ function preprocessImageForOCR($image_path) {
     // Convert to grayscale
     imagefilter($resized_image, IMG_FILTER_GRAYSCALE);
     
-    // Enhance contrast
-    imagefilter($resized_image, IMG_FILTER_CONTRAST, -20);
+    // Apply threshold with Otsu's method approximation
+    // Calculate histogram
+    $histogram = [];
+    for ($i = 0; $i < 256; $i++) {
+        $histogram[$i] = 0;
+    }
     
-    // Apply threshold (convert to black and white)
-    imagefilter($resized_image, IMG_FILTER_THRESHOLD, 127);
+    // Build histogram
+    for ($y = 0; $y < $new_height; $y++) {
+        for ($x = 0; $x < $new_width; $x++) {
+            $rgb = imagecolorat($resized_image, $x, $y);
+            $r = ($rgb >> 16) & 0xFF;
+            $histogram[$r]++;
+        }
+    }
+    
+    // Calculate Otsu threshold
+    $total_pixels = $new_width * $new_height;
+    $sum = 0;
+    for ($i = 0; $i < 256; $i++) {
+        $sum += $i * $histogram[$i];
+    }
+    
+    $sumB = 0;
+    $wB = 0;
+    $wF = 0;
+    $varMax = 0;
+    $threshold = 0;
+    
+    for ($i = 0; $i < 256; $i++) {
+        $wB += $histogram[$i];
+        if ($wB == 0) continue;
+        
+        $wF = $total_pixels - $wB;
+        if ($wF == 0) break;
+        
+        $sumB += $i * $histogram[$i];
+        $mB = $sumB / $wB;
+        $mF = ($sum - $sumB) / $wF;
+        
+        $varBetween = $wB * $wF * ($mB - $mF) * ($mB - $mF);
+        
+        if ($varBetween > $varMax) {
+            $varMax = $varBetween;
+            $threshold = $i;
+        }
+    }
+    
+    // Apply threshold
+    for ($y = 0; $y < $new_height; $y++) {
+        for ($x = 0; $x < $new_width; $x++) {
+            $rgb = imagecolorat($resized_image, $x, $y);
+            $r = ($rgb >> 16) & 0xFF;
+            $color = ($r >= $threshold) ? 255 : 0;
+            $new_color = imagecolorallocate($resized_image, $color, $color, $color);
+            imagesetpixel($resized_image, $x, $y, $new_color);
+        }
+    }
+    
+    // Apply dilation (1x1 kernel)
+    $dilated_image = imagecreatetruecolor($new_width, $new_height);
+    imagecopy($dilated_image, $resized_image, 0, 0, 0, 0, $new_width, $new_height);
+    
+    for ($y = 1; $y < $new_height - 1; $y++) {
+        for ($x = 1; $x < $new_width - 1; $x++) {
+            $is_black = false;
+            // Check 1x1 neighborhood
+            for ($ky = -1; $ky <= 1; $ky++) {
+                for ($kx = -1; $kx <= 1; $kx++) {
+                    $rgb = imagecolorat($resized_image, $x + $kx, $y + $ky);
+                    $r = ($rgb >> 16) & 0xFF;
+                    if ($r == 0) {
+                        $is_black = true;
+                        break 2;
+                    }
+                }
+            }
+            if ($is_black) {
+                $black = imagecolorallocate($dilated_image, 0, 0, 0);
+                imagesetpixel($dilated_image, $x, $y, $black);
+            }
+        }
+    }
     
     // Save as PNG
-    $success = imagepng($resized_image, $temp_path, 9); // Compression level 9
+    $success = imagepng($dilated_image, $temp_path, 9); // Compression level 9
     
     // Clean up
     imagedestroy($image);
     imagedestroy($resized_image);
+    imagedestroy($dilated_image);
     
     return $success ? $temp_path : false;
 }
