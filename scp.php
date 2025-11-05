@@ -77,10 +77,11 @@ if (!isset($DEFAULT_TEXT_MODEL)) {
 }
 
 /**
- * Get selected model and language from POST data, cookies, or use defaults
+ * Get selected model, language, and format from POST data, cookies, or use defaults
  */
 $MODEL = isset($_POST['model']) ? $_POST['model'] : (isset($_COOKIE['scp-model']) ? $_COOKIE['scp-model'] : $DEFAULT_TEXT_MODEL);
 $LANGUAGE = isset($_POST['language']) ? $_POST['language'] : (isset($_COOKIE['scp-language']) ? $_COOKIE['scp-language'] : 'en');
+$FORMAT = isset($_POST['format']) ? $_POST['format'] : (isset($_COOKIE['scp-format']) ? $_COOKIE['scp-format'] : 'markdown');
 
 /**
  * Validate model selection
@@ -99,24 +100,40 @@ if (!array_key_exists($LANGUAGE, $AVAILABLE_LANGUAGES)) {
 }
 
 /**
- * System prompt for the AI model
- * Contains instructions for extracting main content and converting to Markdown
+ * Validate format selection
+ * Falls back to Markdown if invalid format is selected
  */
-$SYSTEM_PROMPT = "You are a content extraction assistant. Your task is to identify the main content of a web page and convert it to clean, well-formatted Markdown.
+if (!in_array($FORMAT, ['markdown', 'dokuwiki'])) {
+    $FORMAT = 'markdown'; // Default to Markdown
+}
+
+/**
+ * Available output formats
+ */
+$AVAILABLE_FORMATS = [
+    'markdown' => 'Markdown',
+    'dokuwiki' => 'DokuWiki'
+];
+
+/**
+ * System prompt for the AI model
+ * Contains instructions for extracting main content and converting to the selected format
+ */
+$SYSTEM_PROMPT = "You are a content extraction assistant. Your task is to identify the main content of a web page and convert it to clean, well-formatted " . $AVAILABLE_FORMATS[$FORMAT] . ".
 
 Instructions:
 " . getLanguageInstruction($LANGUAGE) . "
 
 1. Extract ONLY the primary content of the page (article text, main information)
 2. Remove navigation menus, footers, sidebars, ads, and other non-essential elements
-3. Convert the main content to clean Markdown format with proper headings, lists, etc.
+3. Convert the main content to clean " . $AVAILABLE_FORMATS[$FORMAT] . " format with proper headings, lists, etc.
 4. Preserve important formatting like bold, italics, links
 5. Do not include any explanations or extra text
-6. Return ONLY the Markdown content
+6. Return ONLY the " . $AVAILABLE_FORMATS[$FORMAT] . " content
 
 Example:
 Input HTML might contain a full web page with headers, nav bars, etc.
-Output should be just the main article content in clean Markdown format.";
+Output should be just the main article content in clean " . $AVAILABLE_FORMATS[$FORMAT] . " format.";
 
 /**
  * Application state variables
@@ -182,10 +199,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) {
             }
         }
         
-        // Set cookies with the selected model and language only for web requests
+        // Set cookies with the selected model, language, and format only for web requests
         if (!$is_api_request) {
             setcookie('scp-model', $MODEL, time() + (30 * 24 * 60 * 60), '/'); // 30 days
             setcookie('scp-language', $LANGUAGE, time() + (30 * 24 * 60 * 60), '/'); // 30 days
+            setcookie('scp-format', $FORMAT, time() + (30 * 24 * 60 * 60), '/'); // 30 days
         }
         
         // Return JSON if it's an API request
@@ -319,6 +337,17 @@ function scrapeUrl($url) {
                     <select id="language" name="language">
                         <?php foreach ($AVAILABLE_LANGUAGES as $value => $label): ?>
                             <option value="<?php echo htmlspecialchars($value); ?>" <?php echo ($LANGUAGE === $value) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($label); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="format">Output format:</label>
+                    <select id="format" name="format">
+                        <?php foreach ($AVAILABLE_FORMATS as $value => $label): ?>
+                            <option value="<?php echo htmlspecialchars($value); ?>" <?php echo ($FORMAT === $value) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($label); ?>
                             </option>
                         <?php endforeach; ?>
