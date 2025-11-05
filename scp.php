@@ -77,18 +77,6 @@ if (!isset($DEFAULT_TEXT_MODEL)) {
 }
 
 /**
- * Available output languages for content parsing
- */
-$AVAILABLE_LANGUAGES = [
-    'en' => 'English',
-    'ro' => 'Română',
-    'es' => 'Español',
-    'fr' => 'Français',
-    'de' => 'Deutsch',
-    'it' => 'Italiano'
-];
-
-/**
  * Get selected model and language from POST data, cookies, or use defaults
  */
 $MODEL = isset($_POST['model']) ? $_POST['model'] : (isset($_COOKIE['scp-model']) ? $_COOKIE['scp-model'] : $DEFAULT_TEXT_MODEL);
@@ -292,7 +280,7 @@ function scrapeUrl($url) {
             <?php if ($result): ?>
                 <div class="result-card">
                     <div class="result-header">
-                        <h2 style="color: #111827; font-size: 20px;">Parsed Content</h2>
+                        <h2 style="color: #111827; font-size: 20px;">Page Content</h2>
                     </div>
                     
                     <textarea class="markdown-result" readonly><?php echo htmlspecialchars($result); ?></textarea>
@@ -341,7 +329,7 @@ function scrapeUrl($url) {
                     <?php if ($processing && !$result && !$error): ?>
                         <span class="loading"></span>
                     <?php endif; ?>
-                    📄 Parse Content
+                    📄 Web scrap
                 </button>
                 
                 <button type="button" class="btn btn-secondary" onclick="clearForm()">
