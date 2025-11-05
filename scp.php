@@ -131,7 +131,16 @@ Instructions:
 5. Do not include any explanations or extra text
 6. Return ONLY the " . $AVAILABLE_FORMATS[$FORMAT] . " content
 
-Example:
+" . ($FORMAT === 'dokuwiki' ? "DOKUWIKI FORMATTING GUIDE:
+- Headings: Use ====== for h1, ===== for h2, ==== for h3, etc.
+- Bold: Use **bold text**
+- Italic: Use //italic text//
+- Links: Use [[url|link text]] or [[url]]
+- Bullet lists: Use * for each item
+- Numbered lists: Use # for each item
+- Code blocks: Use <code>...</code> or <file>...</file>
+
+" : "") . "Example:
 Input HTML might contain a full web page with headers, nav bars, etc.
 Output should be just the main article content in clean " . $AVAILABLE_FORMATS[$FORMAT] . " format.";
 
