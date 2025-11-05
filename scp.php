@@ -119,7 +119,7 @@ $AVAILABLE_FORMATS = [
  * System prompt for the AI model
  * Contains instructions for extracting main content and converting to the selected format
  */
-$SYSTEM_PROMPT = "You are a content extraction assistant. Your task is to identify the main content of a web page and convert it to clean, well-formatted " . $AVAILABLE_FORMATS[$FORMAT] . ".
+$SYSTEM_PROMPT = "You are a content extraction assistant. Your task is to identify the main content of a web page and convert it to clean, well-formatted " . $AVAILABLE_FORMATS[$FORMAT] . " document.
 
 Instructions:
 " . getLanguageInstruction($LANGUAGE) . "
@@ -193,7 +193,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) {
             } elseif (isset($response_data['choices'][0]['message']['content'])) {
                 $result = trim($response_data['choices'][0]['message']['content']);
                 // Remove markdown code fences if present
-                $result = preg_replace('/^```(?:markdown)?\s*(.*?)\s*```$/s', '$1', $result);
+                $result = preg_replace('/^```(?:markdown)?(?:dokuwiki)?\s*(.*?)\s*```$/s', '$1', $result);
             } else {
                 $error = 'Invalid API response format';
             }
