@@ -252,11 +252,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
 
         <div class="content">
             <form method="POST" action="" id="analysisForm">
-                <div class="form-group">
-                    <label for="report">Patient discharge paper:</label>
-                    <textarea id="report" name="report" rows="8" required placeholder="Enter the patient discharge paper here...&#10;&#10;Example: Patient discharged after treatment for pneumonia. Chest X-ray shows resolved infiltrate."><?php echo isset($_POST['report']) ? htmlspecialchars($_POST['report']) : ''; ?></textarea>
-                </div>
-                
                 <?php if ($error): ?>
                     <div class="error">
                         <strong>⚠️ Error:</strong> <?php echo htmlspecialchars($error); ?>
@@ -290,6 +285,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
                         </div>
                     </div>
                 <?php endif; ?>
+
+                <div class="form-group">
+                    <label for="report">Patient discharge paper:</label>
+                    <textarea id="report" name="report" rows="8" required placeholder="Enter the patient discharge paper here...&#10;&#10;Example: Patient discharged after treatment for pneumonia. Chest X-ray shows resolved infiltrate."><?php echo isset($_POST['report']) ? htmlspecialchars($_POST['report']) : ''; ?></textarea>
+                </div>
 
                 <div class="form-group">
                     <label for="model">AI model:</label>

@@ -254,17 +254,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
 
         <div class="content">
             <form method="POST" action="" id="analysisForm">
-                <div class="form-group">
-                    <label for="report">Radiology report:</label>
-                    <textarea 
-                        id="report" 
-                        name="report" 
-                        rows="8" 
-                        required
-                        placeholder="Enter the radiology report here...&#10;&#10;Example: Hazy opacity in the left mid lung field, possibly representing consolidation or infiltrate. No pleural effusion, pneumothorax or pneumoperitoneum."
-                    ><?php echo isset($_POST['report']) ? htmlspecialchars($_POST['report']) : ''; ?></textarea>
-                </div>
-                
                 <?php if ($error): ?>
                     <div class="error">
                         <strong>⚠️ Error:</strong> <?php echo htmlspecialchars($error); ?>
@@ -298,6 +287,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
                         </div>
                     </div>
                 <?php endif; ?>
+
+                <div class="form-group">
+                    <label for="report">Radiology report:</label>
+                    <textarea 
+                        id="report" 
+                        name="report" 
+                        rows="8" 
+                        required
+                        placeholder="Enter the radiology report here...&#10;&#10;Example: Hazy opacity in the left mid lung field, possibly representing consolidation or infiltrate. No pleural effusion, pneumothorax or pneumoperitoneum."
+                    ><?php echo isset($_POST['report']) ? htmlspecialchars($_POST['report']) : ''; ?></textarea>
+                </div>
 
                 <div class="form-group">
                     <label for="model">AI model:</label>
