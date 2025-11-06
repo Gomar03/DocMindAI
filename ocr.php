@@ -268,20 +268,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image']) && $_FILES[
 
         <div class="content">
             <form method="POST" action="" id="ocrForm" enctype="multipart/form-data">
-                <div class="form-group">
-                    <label for="image">Image file:</label>
-                    <input 
-                        type="file" 
-                        id="image" 
-                        name="image" 
-                        accept="image/jpeg,image/png,image/gif,image/webp,application/pdf"
-                        required
-                    >
-                    <div class="file-info">
-                        Supported formats: JPEG, PNG, GIF, WebP, PDF. Maximum size: 10MB.
-                    </div>
-                </div>
-                
                 <?php if ($error): ?>
                     <div class="error">
                         <strong>⚠️ Error:</strong> <?php echo htmlspecialchars($error); ?>
@@ -310,6 +296,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image']) && $_FILES[
                     </div>
                     <?php endif; ?>
                 <?php endif; ?>
+
+                <div class="form-group">
+                    <label for="image">Image file:</label>
+                    <input 
+                        type="file" 
+                        id="image" 
+                        name="image" 
+                        accept="image/jpeg,image/png,image/gif,image/webp,application/pdf"
+                        required
+                    >
+                    <div class="file-info">
+                        Supported formats: JPEG, PNG, GIF, WebP, PDF. Maximum size: 10MB.
+                    </div>
+                </div>
 
                 <div class="form-group">
                     <label for="model">AI model:</label>
