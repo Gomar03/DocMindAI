@@ -243,6 +243,7 @@ function preprocessImageForOCR($image_path) {
     
     // Save as PNG
     $success = imagepng($dilated_image, $temp_path, 9); // Compression level 9
+    //$success = imagepng($resized_image, $temp_path, 9); // Compression level 9
     
     // Clean up
     imagedestroy($image);
