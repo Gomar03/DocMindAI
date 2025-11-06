@@ -267,36 +267,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image']) && $_FILES[
         </div>
 
         <div class="content">
-            <?php if ($error): ?>
-                <div class="error">
-                    <strong>⚠️ Error:</strong> <?php echo htmlspecialchars($error); ?>
-                </div>
-            <?php endif; ?>
-            
-            <?php if ($result): ?>
-                <div class="result-card">
-                    <div class="result-header">
-                        <h2 style="color: #111827; font-size: 20px;">OCR Result</h2>
+            <form method="POST" action="" id="ocrForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="image">Image file:</label>
+                    <input 
+                        type="file" 
+                        id="image" 
+                        name="image" 
+                        accept="image/jpeg,image/png,image/gif,image/webp,application/pdf"
+                        required
+                    >
+                    <div class="file-info">
+                        Supported formats: JPEG, PNG, GIF, WebP, PDF. Maximum size: 10MB.
                     </div>
-                    
-                    <textarea class="markdown-result" readonly><?php echo htmlspecialchars($result); ?></textarea>
                 </div>
                 
-                <?php if (isset($preprocessed_image_base64)): ?>
-                <div class="result-card">
-                    <div class="result-header">
-                        <h2 style="color: #111827; font-size: 20px;">Preprocessed Image</h2>
+                <?php if ($error): ?>
+                    <div class="error">
+                        <strong>⚠️ Error:</strong> <?php echo htmlspecialchars($error); ?>
                     </div>
-                    <div class="preprocessed-image-container">
-                        <img src="data:image/png;base64,<?php echo $preprocessed_image_base64; ?>" 
-                             alt="Preprocessed image for OCR" 
-                             class="preprocessed-image">
-                    </div>
-                </div>
                 <?php endif; ?>
-            <?php endif; ?>
+                
+                <?php if ($result): ?>
+                    <div class="result-card">
+                        <div class="result-header">
+                            <h2 style="color: #111827; font-size: 20px;">OCR Result</h2>
+                        </div>
+                        
+                        <textarea class="markdown-result" readonly><?php echo htmlspecialchars($result); ?></textarea>
+                    </div>
+                    
+                    <?php if (isset($preprocessed_image_base64)): ?>
+                    <div class="result-card">
+                        <div class="result-header">
+                            <h2 style="color: #111827; font-size: 20px;">Preprocessed Image</h2>
+                        </div>
+                        <div class="preprocessed-image-container">
+                            <img src="data:image/png;base64,<?php echo $preprocessed_image_base64; ?>" 
+                                 alt="Preprocessed image for OCR" 
+                                 class="preprocessed-image">
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                <?php endif; ?>
 
-            <form method="POST" action="" id="ocrForm" enctype="multipart/form-data">
                 <div class="form-group">
                     <label for="model">AI model:</label>
                     <select id="model" name="model">
@@ -317,20 +331,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image']) && $_FILES[
                             </option>
                         <?php endforeach; ?>
                     </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="image">Image file:</label>
-                    <input 
-                        type="file" 
-                        id="image" 
-                        name="image" 
-                        accept="image/jpeg,image/png,image/gif,image/webp"
-                        required
-                    >
-                    <div class="file-info">
-                        Supported formats: JPEG, PNG, GIF, WebP, PDF. Maximum size: 10MB.
-                    </div>
                 </div>
                 
                 <button type="submit" name="submit" value="1" class="btn btn-primary">
