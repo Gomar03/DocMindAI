@@ -623,7 +623,7 @@ function getCheckout($checkout_id) {
                                 <div class="report-item">
                                     <span class="label"><?php echo ucfirst(str_replace('_', ' ', $key)); ?>:</span>
                                     <?php if (is_array($value)): ?>
-                                        <?php if ($key === 'checkout_ids'): ?>
+                                        <?php if ($key === 'checkout_ids' || $key === 'checkin_ids'): ?>
                                             <?php foreach ($value as $id): ?>
                                                 <a href="?checkout=<?php echo urlencode($id); ?>&get=page" class="btn btn-secondary" style="display: inline-block; margin: 2px; padding: 4px 8px; font-size: 12px;">
                                                     <?php echo htmlspecialchars($id); ?>
@@ -652,6 +652,24 @@ function getCheckout($checkout_id) {
                                 <div class="report-item">
                                     <a href="?checkout=<?php echo urlencode($id); ?>&get=page" class="btn btn-secondary" style="display: inline-block; margin: 5px 0;">
                                         View Checkout #<?php echo htmlspecialchars($id); ?>
+                                    </a>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+                
+                <?php if (isset($patient_data['checkin_ids']) && is_array($patient_data['checkin_ids']) && !empty($patient_data['checkin_ids'])): ?>
+                    <div class="result-card">
+                        <div class="result-header">
+                            <h2 style="color: #111827; font-size: 20px;">Patient Checkins</h2>
+                        </div>
+                        
+                        <div class="summary-box">
+                            <?php foreach ($patient_data['checkin_ids'] as $id): ?>
+                                <div class="report-item">
+                                    <a href="?checkout=<?php echo urlencode($id); ?>&get=page" class="btn btn-secondary" style="display: inline-block; margin: 5px 0;">
+                                        View Checkin #<?php echo htmlspecialchars($id); ?>
                                     </a>
                                 </div>
                             <?php endforeach; ?>
