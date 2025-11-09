@@ -105,8 +105,8 @@ if ($show_spec) {
         ],
         "servers" => [
             [
-                "url" => "http://localhost:44660",
-                "description" => "Local development server"
+                "url" => "http://10.200.8.16:44660",
+                "description" => "Hipocrate API server"
             ]
         ],
         "paths" => [
