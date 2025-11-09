@@ -1,6 +1,9 @@
 <?php
 // hipp.php - Hipocrate Patient Analyzer Interface
 
+// Include common functions
+include 'common.php';
+
 // API Configuration
 $API_BASE_URL = "http://10.200.8.16:44660";
 $API_LOGIN_URL = $API_BASE_URL . "/api/login";
@@ -155,212 +158,154 @@ function getAnalysisReport($report_id) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hipocrate Patient Analyzer</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-        }
-        .search-form {
-            margin-bottom: 30px;
-            text-align: center;
-        }
-        .search-input {
-            padding: 12px;
-            width: 300px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-        .search-button {
-            padding: 12px 24px;
-            background-color: #007cba;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-left: 10px;
-        }
-        .search-button:hover {
-            background-color: #005a87;
-        }
-        .message {
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 4px;
-        }
-        .error {
-            background-color: #ffebee;
-            color: #c62828;
-            border: 1px solid #ffcdd2;
-        }
-        .success {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-            border: 1px solid #c8e6c9;
-        }
-        .patient-info {
-            background-color: #f9f9f9;
-            padding: 20px;
-            border-radius: 4px;
-            margin-bottom: 30px;
-        }
-        .patient-info h2 {
-            margin-top: 0;
-            color: #333;
-        }
-        .reports-section {
-            margin-top: 30px;
-        }
-        .report {
-            background-color: #f0f8ff;
-            padding: 20px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            border-left: 4px solid #007cba;
-        }
-        .report h3 {
-            margin-top: 0;
-            color: #333;
-        }
-        .report-item {
-            margin-bottom: 10px;
-        }
-        .label {
-            font-weight: bold;
-            display: inline-block;
-            width: 150px;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>Hipocrate Patient Analyzer</h1>
-        
-        <div class="search-form">
-            <form method="POST">
-                <input 
-                    type="text" 
-                    name="search_term" 
-                    class="search-input" 
-                    placeholder="Enter patient name or CNP" 
-                    value="<?php echo htmlspecialchars($search_term); ?>"
-                    required
-                >
-                <button type="submit" class="search-button">Search Patient</button>
-            </form>
+        <div class="header">
+            <h1>🏥 Hipocrate Patient Analyzer</h1>
+            <p>Search patient information and medical imaging reports</p>
         </div>
-        
-        <?php if ($error_message): ?>
-            <div class="message error">
-                <?php echo htmlspecialchars($error_message); ?>
-            </div>
-        <?php endif; ?>
-        
-        <?php if ($success_message): ?>
-            <div class="message success">
-                <?php echo htmlspecialchars($success_message); ?>
-            </div>
-        <?php endif; ?>
-        
-        <?php if ($patient_data): ?>
-            <div class="patient-info">
-                <h2>Patient Information</h2>
-                <?php foreach ($patient_data as $key => $value): ?>
-                    <div class="report-item">
-                        <span class="label"><?php echo ucfirst(str_replace('_', ' ', $key)); ?>:</span>
-                        <?php if (is_array($value)): ?>
-                            <?php echo implode(', ', $value); ?>
-                        <?php else: ?>
-                            <?php echo htmlspecialchars($value); ?>
-                        <?php endif; ?>
+
+        <div class="content">
+            <form method="POST" action="">
+                <?php if ($error_message): ?>
+                    <div class="error">
+                        <strong>⚠️ Error:</strong> <?php echo htmlspecialchars($error_message); ?>
                     </div>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-        
-        <?php if ($analyses_data && isset($analyses_data['analyses']) && !empty($analyses_data['analyses'])): ?>
-            <div class="reports-section">
-                <h2>Medical Imaging Reports</h2>
-                <?php foreach ($reports_data as $report): ?>
-                    <div class="report">
-                        <h3>Report Details</h3>
-                        <?php if (isset($report['patient_name'])): ?>
+                <?php endif; ?>
+                
+                <?php if ($success_message): ?>
+                    <div class="success">
+                        <strong>✅ Success:</strong> <?php echo htmlspecialchars($success_message); ?>
+                    </div>
+                <?php endif; ?>
+                
+                <div class="form-group">
+                    <label for="search_term">Patient Search:</label>
+                    <input 
+                        type="text" 
+                        id="search_term"
+                        name="search_term" 
+                        required
+                        placeholder="Enter patient name or CNP" 
+                        value="<?php echo htmlspecialchars($search_term); ?>"
+                    >
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    🔍 Search Patient
+                </button>
+                
+                <button type="button" class="btn btn-secondary" onclick="clearForm()">
+                    🔄 New Search
+                </button>
+            </form>
+            
+            <?php if ($patient_data): ?>
+                <div class="result-card">
+                    <div class="result-header">
+                        <h2 style="color: #111827; font-size: 20px;">Patient Information</h2>
+                    </div>
+                    
+                    <div class="summary-box">
+                        <?php foreach ($patient_data as $key => $value): ?>
                             <div class="report-item">
-                                <span class="label">Patient Name:</span>
-                                <?php echo htmlspecialchars($report['patient_name']); ?>
+                                <span class="label"><?php echo ucfirst(str_replace('_', ' ', $key)); ?>:</span>
+                                <?php if (is_array($value)): ?>
+                                    <?php echo implode(', ', $value); ?>
+                                <?php else: ?>
+                                    <?php echo htmlspecialchars($value); ?>
+                                <?php endif; ?>
                             </div>
-                        <?php endif; ?>
-                        
-                        <?php if (isset($report['age'])): ?>
-                            <div class="report-item">
-                                <span class="label">Age:</span>
-                                <?php echo htmlspecialchars($report['age']); ?>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <?php if (isset($report['gender'])): ?>
-                            <div class="report-item">
-                                <span class="label">Gender:</span>
-                                <?php echo htmlspecialchars($report['gender']); ?>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <?php if (isset($report['examination'])): ?>
-                            <div class="report-item">
-                                <span class="label">Examination:</span>
-                                <?php echo htmlspecialchars($report['examination']); ?>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <?php if (isset($report['sample_datetime'])): ?>
-                            <div class="report-item">
-                                <span class="label">Sample Date:</span>
-                                <?php echo htmlspecialchars($report['sample_datetime']); ?>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <?php if (isset($report['examiner'])): ?>
-                            <div class="report-item">
-                                <span class="label">Examiner:</span>
-                                <?php echo htmlspecialchars($report['examiner']); ?>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <?php if (isset($report['reports']) && is_array($report['reports'])): ?>
-                            <h4>Report Details:</h4>
-                            <?php foreach ($report['reports'] as $report_detail): ?>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+            
+            <?php if ($analyses_data && isset($analyses_data['analyses']) && !empty($analyses_data['analyses'])): ?>
+                <div class="result-card">
+                    <div class="result-header">
+                        <h2 style="color: #111827; font-size: 20px;">Medical Imaging Reports</h2>
+                    </div>
+                    
+                    <?php foreach ($reports_data as $report): ?>
+                        <div class="summary-box">
+                            <h3>Report Details</h3>
+                            <?php if (isset($report['patient_name'])): ?>
                                 <div class="report-item">
-                                    <?php foreach ($report_detail as $key => $value): ?>
-                                        <div>
-                                            <span class="label"><?php echo ucfirst(str_replace('_', ' ', $key)); ?>:</span>
-                                            <?php echo htmlspecialchars($value); ?>
-                                        </div>
-                                    <?php endforeach; ?>
+                                    <span class="label">Patient Name:</span>
+                                    <?php echo htmlspecialchars($report['patient_name']); ?>
                                 </div>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
+                            <?php endif; ?>
+                            
+                            <?php if (isset($report['age'])): ?>
+                                <div class="report-item">
+                                    <span class="label">Age:</span>
+                                    <?php echo htmlspecialchars($report['age']); ?>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <?php if (isset($report['gender'])): ?>
+                                <div class="report-item">
+                                    <span class="label">Gender:</span>
+                                    <?php echo htmlspecialchars($report['gender']); ?>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <?php if (isset($report['examination'])): ?>
+                                <div class="report-item">
+                                    <span class="label">Examination:</span>
+                                    <?php echo htmlspecialchars($report['examination']); ?>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <?php if (isset($report['sample_datetime'])): ?>
+                                <div class="report-item">
+                                    <span class="label">Sample Date:</span>
+                                    <?php echo htmlspecialchars($report['sample_datetime']); ?>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <?php if (isset($report['examiner'])): ?>
+                                <div class="report-item">
+                                    <span class="label">Examiner:</span>
+                                    <?php echo htmlspecialchars($report['examiner']); ?>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <?php if (isset($report['reports']) && is_array($report['reports'])): ?>
+                                <h4>Report Details:</h4>
+                                <?php foreach ($report['reports'] as $report_detail): ?>
+                                    <div class="report-item">
+                                        <?php foreach ($report_detail as $key => $value): ?>
+                                            <div>
+                                                <span class="label"><?php echo ucfirst(str_replace('_', ' ', $key)); ?>:</span>
+                                                <?php echo htmlspecialchars($value); ?>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php elseif ($patient_data): ?>
+                <div class="result-card">
+                    <div class="summary-box">
+                        <p>No medical imaging reports found for this patient.</p>
                     </div>
-                <?php endforeach; ?>
-            </div>
-        <?php elseif ($patient_data): ?>
-            <div class="message info">
-                No medical imaging reports found for this patient.
-            </div>
-        <?php endif; ?>
+                </div>
+            <?php endif; ?>
+        </div>
     </div>
+    
+    <script>
+        function clearForm() {
+            document.getElementById('search_term').value = '';
+            // Reload page to clear results
+            window.location.href = window.location.pathname;
+        }
+    </script>
 </body>
 </html>
