@@ -603,7 +603,7 @@ function getCheckout($checkout_id) {
                         >
                     </div>
                     
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" name="get" value="page" class="btn btn-primary">
                         🔍 Search Patient
                     </button>
                     
