@@ -329,7 +329,15 @@ function getCheckout($checkout_id) {
                                 <div class="report-item">
                                     <span class="label"><?php echo ucfirst(str_replace('_', ' ', $key)); ?>:</span>
                                     <?php if (is_array($value)): ?>
-                                        <?php echo implode(', ', $value); ?>
+                                        <?php if ($key === 'checkout_ids'): ?>
+                                            <?php foreach ($value as $id): ?>
+                                                <a href="?checkout=<?php echo urlencode($id); ?>" class="btn btn-secondary" style="display: inline-block; margin: 2px; padding: 4px 8px; font-size: 12px;">
+                                                    <?php echo htmlspecialchars($id); ?>
+                                                </a>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <?php echo implode(', ', $value); ?>
+                                        <?php endif; ?>
                                     <?php else: ?>
                                         <?php echo htmlspecialchars($value); ?>
                                     <?php endif; ?>
