@@ -87,8 +87,126 @@ $checkout_id = isset($_GET['checkout']) ? trim($_GET['checkout']) : "";
 // Check if search term is provided in query string
 $query_search_term = isset($_GET['search']) ? trim($_GET['search']) : "";
 
+// Check if API spec is requested
+$show_spec = isset($_GET['spec']);
+
 // Check if this is an API request (no submit button)
 $is_api_request = !isset($_POST['submit']);
+
+// If spec is requested, return the API specification
+if ($show_spec) {
+    header('Content-Type: application/json');
+    $spec = [
+        "openapi" => "3.0.0",
+        "info" => [
+            "title" => "Hipocrate Patient Analyzer API",
+            "description" => "API for accessing patient data from the Hipocrate medical system",
+            "version" => "1.0.0"
+        ],
+        "servers" => [
+            [
+                "url" => "http://localhost:44660",
+                "description" => "Local development server"
+            ]
+        ],
+        "paths" => [
+            "/" => [
+                "get" => [
+                    "summary" => "Web interface",
+                    "description" => "Returns the web interface for patient analysis",
+                    "responses" => [
+                        "200" => [
+                            "description" => "HTML web interface"
+                        ]
+                    ]
+                ],
+                "post" => [
+                    "summary" => "Patient search",
+                    "description" => "Search for patients by name or CNP",
+                    "requestBody" => [
+                        "required" => true,
+                        "content" => [
+                            "application/x-www-form-urlencoded" => [
+                                "schema" => [
+                                    "type" => "object",
+                                    "properties" => [
+                                        "search" => [
+                                            "type" => "string",
+                                            "description" => "Patient name or CNP to search for"
+                                        ]
+                                    ],
+                                    "required" => ["search"]
+                                ]
+                            ]
+                        ]
+                    ],
+                    "responses" => [
+                        "200" => [
+                            "description" => "Search results in HTML format"
+                        ]
+                    ]
+                ]
+            ],
+            "/?search={search}" => [
+                "get" => [
+                    "summary" => "Patient search via query parameter",
+                    "description" => "Search for patients by name or CNP using query parameter",
+                    "parameters" => [
+                        [
+                            "name" => "search",
+                            "in" => "query",
+                            "required" => true,
+                            "description" => "Patient name or CNP to search for",
+                            "schema" => [
+                                "type" => "string"
+                            ]
+                        ]
+                    ],
+                    "responses" => [
+                        "200" => [
+                            "description" => "Search results in HTML format"
+                        ]
+                    ]
+                ]
+            ],
+            "/?checkout={id}" => [
+                "get" => [
+                    "summary" => "Get checkout information",
+                    "description" => "Retrieve checkout information by ID",
+                    "parameters" => [
+                        [
+                            "name" => "checkout",
+                            "in" => "query",
+                            "required" => true,
+                            "description" => "Checkout ID",
+                            "schema" => [
+                                "type" => "string"
+                            ]
+                        ]
+                    ],
+                    "responses" => [
+                        "200" => [
+                            "description" => "Checkout information in HTML format"
+                        ]
+                    ]
+                ]
+            ],
+            "/?spec" => [
+                "get" => [
+                    "summary" => "Get API specification",
+                    "description" => "Returns the OpenAPI specification for this API",
+                    "responses" => [
+                        "200" => [
+                            "description" => "OpenAPI specification in JSON format"
+                        ]
+                    ]
+                ]
+            ]
+        ]
+    ];
+    echo json_encode($spec, JSON_PRETTY_PRINT);
+    exit;
+}
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search'])) {
