@@ -18,8 +18,12 @@ $search_term = "";
 $patient_data = null;
 $analyses_data = null;
 $reports_data = [];
+$checkout_data = null;
 $error_message = "";
 $success_message = "";
+
+// Check if a specific checkout is requested
+$checkout_id = isset($_GET['checkout']) ? trim($_GET['checkout']) : "";
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_term'])) {
@@ -58,6 +62,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_term'])) {
         } else {
             $error_message = $search_result['message'] ?? "Patient not found.";
         }
+    }
+}
+
+// If a checkout ID is provided, fetch that specific checkout
+if (!empty($checkout_id)) {
+    $checkout_result = getCheckout($checkout_id);
+    if ($checkout_result['status'] === 'success') {
+        $checkout_data = $checkout_result;
+    } else {
+        $error_message = $checkout_result['message'] ?? "Failed to retrieve checkout information.";
     }
 }
 
@@ -150,6 +164,36 @@ function getAnalysisReport($report_id) {
         return ['status' => 'error', 'message' => $data['message'] ?? 'Failed to retrieve report.'];
     }
 }
+
+// Function to get checkout information
+function getCheckout($checkout_id) {
+    global $API_CHECKOUTS_URL;
+    
+    $url = $API_CHECKOUTS_URL . "?id=" . urlencode($checkout_id);
+    
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json'
+    ]);
+    
+    $response = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    
+    if ($response === false) {
+        return ['status' => 'error', 'message' => 'API connection failed.'];
+    }
+    
+    $data = json_decode($response, true);
+    
+    if ($http_code === 200) {
+        return $data;
+    } else {
+        return ['status' => 'error', 'message' => $data['message'] ?? 'Failed to retrieve checkout.'];
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -168,134 +212,225 @@ function getAnalysisReport($report_id) {
         </div>
 
         <div class="content">
-            <form method="POST" action="">
-                <?php if ($error_message): ?>
-                    <div class="error">
-                        <strong>⚠️ Error:</strong> <?php echo htmlspecialchars($error_message); ?>
-                    </div>
-                <?php endif; ?>
-                
-                <?php if ($success_message): ?>
-                    <div class="success">
-                        <strong>✅ Success:</strong> <?php echo htmlspecialchars($success_message); ?>
-                    </div>
-                <?php endif; ?>
-                
-                <div class="form-group">
-                    <label for="search_term">Patient Search:</label>
-                    <input 
-                        type="text" 
-                        id="search_term"
-                        name="search_term" 
-                        required
-                        placeholder="Enter patient name or CNP" 
-                        value="<?php echo htmlspecialchars($search_term); ?>"
-                    >
-                </div>
-                
-                <button type="submit" class="btn btn-primary">
-                    🔍 Search Patient
-                </button>
-                
-                <button type="button" class="btn btn-secondary" onclick="clearForm()">
-                    🔄 New Search
-                </button>
-            </form>
-            
-            <?php if ($patient_data): ?>
+            <?php if ($checkout_data): ?>
+                <!-- Display specific checkout information -->
                 <div class="result-card">
                     <div class="result-header">
-                        <h2 style="color: #111827; font-size: 20px;">Patient Information</h2>
+                        <h2 style="color: #111827; font-size: 20px;">Checkout Information</h2>
+                        <a href="hipp.php" class="btn btn-secondary" style="margin-left: 10px;">← Back to Search</a>
                     </div>
                     
                     <div class="summary-box">
-                        <?php foreach ($patient_data as $key => $value): ?>
+                        <?php if (isset($checkout_data['patient_name'])): ?>
                             <div class="report-item">
-                                <span class="label"><?php echo ucfirst(str_replace('_', ' ', $key)); ?>:</span>
-                                <?php if (is_array($value)): ?>
-                                    <?php echo implode(', ', $value); ?>
-                                <?php else: ?>
-                                    <?php echo htmlspecialchars($value); ?>
+                                <span class="label">Patient Name:</span>
+                                <?php echo htmlspecialchars($checkout_data['patient_name']); ?>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <?php if (isset($checkout_data['patient_id'])): ?>
+                            <div class="report-item">
+                                <span class="label">Patient ID:</span>
+                                <?php echo htmlspecialchars($checkout_data['patient_id']); ?>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <?php if (isset($checkout_data['patient_code'])): ?>
+                            <div class="report-item">
+                                <span class="label">Patient Code:</span>
+                                <?php echo htmlspecialchars($checkout_data['patient_code']); ?>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <?php if (isset($checkout_data['admission_diagnostic'])): ?>
+                            <div class="report-item">
+                                <span class="label">Admission Diagnostic:</span>
+                                <?php echo htmlspecialchars($checkout_data['admission_diagnostic']); ?>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <?php if (isset($checkout_data['epicrisis'])): ?>
+                            <div class="report-item">
+                                <span class="label">Epicrisis:</span>
+                                <div style="margin-top: 5px; padding: 10px; background-color: #f0f8ff; border-radius: 4px;">
+                                    <?php echo nl2br(htmlspecialchars($checkout_data['epicrisis'])); ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <?php if (isset($checkout_data['diagnostic'])): ?>
+                            <div class="report-item">
+                                <span class="label">Diagnostic:</span>
+                                <?php echo htmlspecialchars($checkout_data['diagnostic']); ?>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <?php if (isset($checkout_data['surgery'])): ?>
+                            <div class="report-item">
+                                <span class="label">Surgery:</span>
+                                <?php echo htmlspecialchars($checkout_data['surgery']); ?>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <?php if (isset($checkout_data['recommendations'])): ?>
+                            <div class="report-item">
+                                <span class="label">Recommendations:</span>
+                                <div style="margin-top: 5px; padding: 10px; background-color: #f0f8ff; border-radius: 4px;">
+                                    <?php echo nl2br(htmlspecialchars($checkout_data['recommendations'])); ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            <?php else: ?>
+                <!-- Display search form -->
+                <form method="POST" action="">
+                    <?php if ($error_message): ?>
+                        <div class="error">
+                            <strong>⚠️ Error:</strong> <?php echo htmlspecialchars($error_message); ?>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <?php if ($success_message): ?>
+                        <div class="success">
+                            <strong>✅ Success:</strong> <?php echo htmlspecialchars($success_message); ?>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <div class="form-group">
+                        <label for="search_term">Patient Search:</label>
+                        <input 
+                            type="text" 
+                            id="search_term"
+                            name="search_term" 
+                            required
+                            placeholder="Enter patient name or CNP" 
+                            value="<?php echo htmlspecialchars($search_term); ?>"
+                        >
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        🔍 Search Patient
+                    </button>
+                    
+                    <button type="button" class="btn btn-secondary" onclick="clearForm()">
+                        🔄 New Search
+                    </button>
+                </form>
+                
+                <?php if ($patient_data): ?>
+                    <div class="result-card">
+                        <div class="result-header">
+                            <h2 style="color: #111827; font-size: 20px;">Patient Information</h2>
+                        </div>
+                        
+                        <div class="summary-box">
+                            <?php foreach ($patient_data as $key => $value): ?>
+                                <div class="report-item">
+                                    <span class="label"><?php echo ucfirst(str_replace('_', ' ', $key)); ?>:</span>
+                                    <?php if (is_array($value)): ?>
+                                        <?php echo implode(', ', $value); ?>
+                                    <?php else: ?>
+                                        <?php echo htmlspecialchars($value); ?>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+                
+                <?php if (isset($patient_data['checkout_ids']) && is_array($patient_data['checkout_ids']) && !empty($patient_data['checkout_ids'])): ?>
+                    <div class="result-card">
+                        <div class="result-header">
+                            <h2 style="color: #111827; font-size: 20px;">Patient Checkouts</h2>
+                        </div>
+                        
+                        <div class="summary-box">
+                            <?php foreach ($patient_data['checkout_ids'] as $id): ?>
+                                <div class="report-item">
+                                    <a href="?checkout=<?php echo urlencode($id); ?>" class="btn btn-secondary" style="display: inline-block; margin: 5px 0;">
+                                        View Checkout #<?php echo htmlspecialchars($id); ?>
+                                    </a>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+                
+                <?php if ($analyses_data && isset($analyses_data['analyses']) && !empty($analyses_data['analyses'])): ?>
+                    <div class="result-card">
+                        <div class="result-header">
+                            <h2 style="color: #111827; font-size: 20px;">Medical Imaging Reports</h2>
+                        </div>
+                        
+                        <?php foreach ($reports_data as $report): ?>
+                            <div class="summary-box">
+                                <h3>Report Details</h3>
+                                <?php if (isset($report['patient_name'])): ?>
+                                    <div class="report-item">
+                                        <span class="label">Patient Name:</span>
+                                        <?php echo htmlspecialchars($report['patient_name']); ?>
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <?php if (isset($report['age'])): ?>
+                                    <div class="report-item">
+                                        <span class="label">Age:</span>
+                                        <?php echo htmlspecialchars($report['age']); ?>
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <?php if (isset($report['gender'])): ?>
+                                    <div class="report-item">
+                                        <span class="label">Gender:</span>
+                                        <?php echo htmlspecialchars($report['gender']); ?>
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <?php if (isset($report['examination'])): ?>
+                                    <div class="report-item">
+                                        <span class="label">Examination:</span>
+                                        <?php echo htmlspecialchars($report['examination']); ?>
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <?php if (isset($report['sample_datetime'])): ?>
+                                    <div class="report-item">
+                                        <span class="label">Sample Date:</span>
+                                        <?php echo htmlspecialchars($report['sample_datetime']); ?>
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <?php if (isset($report['examiner'])): ?>
+                                    <div class="report-item">
+                                        <span class="label">Examiner:</span>
+                                        <?php echo htmlspecialchars($report['examiner']); ?>
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <?php if (isset($report['reports']) && is_array($report['reports'])): ?>
+                                    <h4>Report Details:</h4>
+                                    <?php foreach ($report['reports'] as $report_detail): ?>
+                                        <div class="report-item">
+                                            <?php foreach ($report_detail as $key => $value): ?>
+                                                <div>
+                                                    <span class="label"><?php echo ucfirst(str_replace('_', ' ', $key)); ?>:</span>
+                                                    <?php echo htmlspecialchars($value); ?>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php endforeach; ?>
                                 <?php endif; ?>
                             </div>
                         <?php endforeach; ?>
                     </div>
-                </div>
-            <?php endif; ?>
-            
-            <?php if ($analyses_data && isset($analyses_data['analyses']) && !empty($analyses_data['analyses'])): ?>
-                <div class="result-card">
-                    <div class="result-header">
-                        <h2 style="color: #111827; font-size: 20px;">Medical Imaging Reports</h2>
-                    </div>
-                    
-                    <?php foreach ($reports_data as $report): ?>
+                <?php elseif ($patient_data): ?>
+                    <div class="result-card">
                         <div class="summary-box">
-                            <h3>Report Details</h3>
-                            <?php if (isset($report['patient_name'])): ?>
-                                <div class="report-item">
-                                    <span class="label">Patient Name:</span>
-                                    <?php echo htmlspecialchars($report['patient_name']); ?>
-                                </div>
-                            <?php endif; ?>
-                            
-                            <?php if (isset($report['age'])): ?>
-                                <div class="report-item">
-                                    <span class="label">Age:</span>
-                                    <?php echo htmlspecialchars($report['age']); ?>
-                                </div>
-                            <?php endif; ?>
-                            
-                            <?php if (isset($report['gender'])): ?>
-                                <div class="report-item">
-                                    <span class="label">Gender:</span>
-                                    <?php echo htmlspecialchars($report['gender']); ?>
-                                </div>
-                            <?php endif; ?>
-                            
-                            <?php if (isset($report['examination'])): ?>
-                                <div class="report-item">
-                                    <span class="label">Examination:</span>
-                                    <?php echo htmlspecialchars($report['examination']); ?>
-                                </div>
-                            <?php endif; ?>
-                            
-                            <?php if (isset($report['sample_datetime'])): ?>
-                                <div class="report-item">
-                                    <span class="label">Sample Date:</span>
-                                    <?php echo htmlspecialchars($report['sample_datetime']); ?>
-                                </div>
-                            <?php endif; ?>
-                            
-                            <?php if (isset($report['examiner'])): ?>
-                                <div class="report-item">
-                                    <span class="label">Examiner:</span>
-                                    <?php echo htmlspecialchars($report['examiner']); ?>
-                                </div>
-                            <?php endif; ?>
-                            
-                            <?php if (isset($report['reports']) && is_array($report['reports'])): ?>
-                                <h4>Report Details:</h4>
-                                <?php foreach ($report['reports'] as $report_detail): ?>
-                                    <div class="report-item">
-                                        <?php foreach ($report_detail as $key => $value): ?>
-                                            <div>
-                                                <span class="label"><?php echo ucfirst(str_replace('_', ' ', $key)); ?>:</span>
-                                                <?php echo htmlspecialchars($value); ?>
-                                            </div>
-                                        <?php endforeach; ?>
-                                    </div>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
+                            <p>No medical imaging reports found for this patient.</p>
                         </div>
-                    <?php endforeach; ?>
-                </div>
-            <?php elseif ($patient_data): ?>
-                <div class="result-card">
-                    <div class="summary-box">
-                        <p>No medical imaging reports found for this patient.</p>
                     </div>
-                </div>
+                <?php endif; ?>
             <?php endif; ?>
         </div>
     </div>
