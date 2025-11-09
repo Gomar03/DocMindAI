@@ -55,6 +55,12 @@
  *      "recommendations": "..."
  *    }
  * 
+ * 3. API Specification:
+ *    GET /hipp.php?get=spec
+ *    
+ *    Response:
+ *    OpenAPI 3.0 specification in JSON format
+ * 
  * @author Costin Stroie <costinstroie@eridu.eu.org>
  * @version 1.0
  * @license GPL 3
@@ -88,7 +94,7 @@ $checkout_id = isset($_GET['checkout']) ? trim($_GET['checkout']) : "";
 $query_search_term = isset($_GET['search']) ? trim($_GET['search']) : "";
 
 // Check if API spec is requested
-$show_spec = isset($_GET['spec']);
+$show_spec = (isset($_GET['get']) && $_GET['get'] === 'spec');
 
 // Check if this is an API request (no submit button)
 $is_api_request = !isset($_POST['submit']);
@@ -191,10 +197,22 @@ if ($show_spec) {
                     ]
                 ]
             ],
-            "/?spec" => [
+            "/?get=spec" => [
                 "get" => [
                     "summary" => "Get API specification",
                     "description" => "Returns the OpenAPI specification for this API",
+                    "parameters" => [
+                        [
+                            "name" => "get",
+                            "in" => "query",
+                            "required" => true,
+                            "description" => "Specify 'spec' to get the API specification",
+                            "schema" => [
+                                "type" => "string",
+                                "enum" => ["spec"]
+                            ]
+                        ]
+                    ],
                     "responses" => [
                         "200" => [
                             "description" => "OpenAPI specification in JSON format"
