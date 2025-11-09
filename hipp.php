@@ -25,6 +25,9 @@ $success_message = "";
 // Check if a specific checkout is requested
 $checkout_id = isset($_GET['checkout']) ? trim($_GET['checkout']) : "";
 
+// Check if search term is provided in query string
+$query_search_term = isset($_GET['search']) ? trim($_GET['search']) : "";
+
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_term'])) {
     $search_term = trim($_POST['search_term']);
@@ -62,6 +65,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_term'])) {
         } else {
             $error_message = $search_result['message'] ?? "Patient not found.";
         }
+    }
+}
+// Handle search from query string
+elseif (!empty($query_search_term)) {
+    $search_term = $query_search_term;
+    
+    // Perform patient search
+    $search_result = searchPatient($search_term);
+    
+    if ($search_result['status'] === 'success') {
+        $patient_data = $search_result['data'];
+        
+        // If we have a patient ID, get their analyses
+        if (isset($patient_data['id'])) {
+            $analyses_result = getPatientAnalyses($patient_data['id']);
+            if ($analyses_result['status'] === 'success') {
+                $analyses_data = $analyses_result;
+                
+                // Get reports for each analysis
+                if (isset($analyses_data['analyses']) && is_array($analyses_data['analyses'])) {
+                    foreach ($analyses_data['analyses'] as $analysis) {
+                        if (isset($analysis['report_id'])) {
+                            $report_result = getAnalysisReport($analysis['report_id']);
+                            if ($report_result['status'] === 'success') {
+                                $reports_data[] = $report_result;
+                            }
+                        }
+                    }
+                }
+            } else {
+                $error_message = $analyses_result['message'] ?? "Failed to retrieve patient analyses.";
+            }
+        }
+    } else {
+        $error_message = $search_result['message'] ?? "Patient not found.";
     }
 }
 
