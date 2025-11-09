@@ -625,7 +625,7 @@ function getCheckout($checkout_id) {
                                     <?php if (is_array($value)): ?>
                                         <?php if ($key === 'checkout_ids' || $key === 'checkin_ids'): ?>
                                             <?php foreach ($value as $id): ?>
-                                                <a href="?checkout=<?php echo urlencode($id); ?>&get=page" class="btn btn-secondary" style="display: inline-block; margin: 2px; padding: 4px 8px; font-size: 12px;">
+                                                <a href="hipp.php?checkout=<?php echo urlencode($id); ?>&get=page" class="btn btn-secondary" style="display: inline-block; margin: 2px; padding: 4px 8px; font-size: 12px;">
                                                     <?php echo htmlspecialchars($id); ?>
                                                 </a>
                                             <?php endforeach; ?>
@@ -650,7 +650,7 @@ function getCheckout($checkout_id) {
                         <div class="summary-box">
                             <?php foreach ($patient_data['checkout_ids'] as $id): ?>
                                 <div class="report-item">
-                                    <a href="?checkout=<?php echo urlencode($id); ?>&get=page" class="btn btn-secondary" style="display: inline-block; margin: 5px 0;">
+                                    <a href="hipp.php?checkout=<?php echo urlencode($id); ?>&get=page" class="btn btn-secondary" style="display: inline-block; margin: 5px 0;">
                                         View Checkout #<?php echo htmlspecialchars($id); ?>
                                     </a>
                                 </div>
@@ -668,7 +668,7 @@ function getCheckout($checkout_id) {
                         <div class="summary-box">
                             <?php foreach ($patient_data['checkin_ids'] as $id): ?>
                                 <div class="report-item">
-                                    <a href="?checkout=<?php echo urlencode($id); ?>&get=page" class="btn btn-secondary" style="display: inline-block; margin: 5px 0;">
+                                    <a href="hipp.php?checkout=<?php echo urlencode($id); ?>&get=page" class="btn btn-secondary" style="display: inline-block; margin: 5px 0;">
                                         View Checkin #<?php echo htmlspecialchars($id); ?>
                                     </a>
                                 </div>
