@@ -459,4 +459,49 @@ function callLLMApi($api_endpoint_chat, $data, $api_key = '') {
     
     return $response_data;
 }
+
+/**
+ * Convert basic markdown to HTML
+ * 
+ * @param string $markdown Markdown text to convert
+ * @return string HTML output
+ */
+function markdownToHtml($markdown) {
+    // Convert headers (# Header)
+    $markdown = preg_replace('/^# (.*$)/m', '<h1>$1</h1>', $markdown);
+    $markdown = preg_replace('/^## (.*$)/m', '<h2>$1</h2>', $markdown);
+    $markdown = preg_replace('/^### (.*$)/m', '<h3>$1</h3>', $markdown);
+    
+    // Convert bold (**bold** or __bold__)
+    $markdown = preg_replace('/\*\*(.*?)\*\*/', '<strong>$1</strong>', $markdown);
+    $markdown = preg_replace('/__(.*?)__/', '<strong>$1</strong>', $markdown);
+    
+    // Convert italic (*italic* or _italic_)
+    $markdown = preg_replace('/\*(.*?)\*/', '<em>$1</em>', $markdown);
+    $markdown = preg_replace('/_(.*?)_/', '<em>$1</em>', $markdown);
+    
+    // Convert inline code (`code`)
+    $markdown = preg_replace('/`(.*?)`/', '<code>$1</code>', $markdown);
+    
+    // Convert code blocks (```code```)
+    $markdown = preg_replace('/```(.*?)```/s', '<pre><code>$1</code></pre>', $markdown);
+    
+    // Convert links ([text](url))
+    $markdown = preg_replace('/\[(.*?)\]\((.*?)\)/', '<a href="$2">$1</a>', $markdown);
+    
+    // Convert unordered lists (* item or - item)
+    $markdown = preg_replace('/^\* (.*$)/m', '<li>$1</li>', $markdown);
+    $markdown = preg_replace('/^- (.*$)/m', '<li>$1</li>', $markdown);
+    // Wrap consecutive <li> elements in <ul>
+    $markdown = preg_replace('/(<li>.*<\/li>(\s*<li>.*<\/li>)*)/s', '<ul>$1</ul>', $markdown);
+    
+    // Convert paragraphs (empty line separated text)
+    $markdown = preg_replace('/\n\s*\n/', '</p><p>', $markdown);
+    $markdown = '<p>' . $markdown . '</p>';
+    
+    // Handle line breaks within paragraphs
+    $markdown = str_replace("\n", '<br>', $markdown);
+    
+    return $markdown;
+}
 ?>
