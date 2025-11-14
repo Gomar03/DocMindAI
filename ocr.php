@@ -5,10 +5,10 @@
  * Handle hupl configuration request
  */
 if (isset($_GET['hupl'])) {
-    $name = $_SERVER['SERVER_NAME'];
+    $name = $_SERVER['SERVER_NAME'] . ' OCR';
     $site_url = ($_SERVER['HTTPS'] ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME'];
     header('Content-Type: text/plain');
-    header('Content-Disposition: attachment; filename="' . $name . '.hupl"');
+    header('Content-Disposition: attachment; filename="' . $_SERVER['SERVER_NAME'] . '.hupl"');
     echo "{\n";
     echo "  \"name\": \"$name\",\n";
     echo "  \"type\": \"http\",\n";
