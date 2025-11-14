@@ -5,7 +5,7 @@
  * Handle hupl configuration request
  */
 if (isset($_GET['hupl'])) {
-    $name = $_SERVER['SERVER_NAME'] . ' OCR';
+    $name = 'Image OCR Tool';
     $site_url = ($_SERVER['HTTPS'] ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME'];
     header('Content-Type: text/plain');
     header('Content-Disposition: attachment; filename="' . $_SERVER['SERVER_NAME'] . '.hupl"');
