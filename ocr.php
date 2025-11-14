@@ -166,14 +166,19 @@ $is_hupl_request = false;
  * Processes both web form submissions and API requests
  * Validates input, calls AI API, and processes response
  */
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_FILES['image']) || isset($_FILES['file'])) && 
+    ((isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) || 
+     (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK))) {
+    
+    // Determine which file input is being used
+    $file_key = isset($_FILES['file']) ? 'file' : 'image';
+    $image_file = $_FILES[$file_key];
+    
     $processing = true;
     $is_api_request = !isset($_POST['submit']); // If no submit button, it's an API request
-    $is_hupl_request = isset($_POST['file']); // Check for hupl-compatible request
+    $is_hupl_request = $file_key === 'file'; // Check for hupl-compatible request
     
     // Validate file upload
-    $image_file = $_FILES['image'];
-    
     // Check file size (max 10MB to accommodate PDFs)
     if ($image_file['size'] > 10 * 1024 * 1024) {
         $error = 'The file is too large. Maximum 10MB allowed.';
