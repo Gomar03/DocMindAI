@@ -5,15 +5,16 @@
  * Handle hupl configuration request
  */
 if (isset($_GET['hupl'])) {
-    header('Content-Type: application/json');
     $name = $_SERVER['SERVER_NAME'];
     $site_url = ($_SERVER['HTTPS'] ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME'];
-    echo json_encode([
-        "name" => $name,
-        "type" => "http",
-        "targetUrl" => $site_url,
-        "fileParam" => "file"
-    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    header('Content-Type: text/plain');
+    header('Content-Disposition: attachment; filename="' . $name . '.hupl"');
+    echo "{\n";
+    echo "  \"name\": \"$name\",\n";
+    echo "  \"type\": \"http\",\n";
+    echo "  \"targetUrl\": \"$site_url\",\n";
+    echo "  \"fileParam\": \"file\"\n";
+    echo "}";
     exit;
 }
 
