@@ -218,12 +218,13 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) ||
                         $error = 'Invalid title in response';
                     } elseif (!is_string($result['summary']) || empty($result['summary'])) {
                         $error = 'Invalid summary in response';
-                    } elseif (!is_array($result['key_points']) || count($result['key_points']) !== 5) {
-                        $error = 'Invalid key_points in response (must be array with exactly 5 items)';
-                    } elseif (!is_array($result['keywords']) || count($result['keywords']) !== 3) {
-                        $error = 'Invalid keywords in response (must be array with exactly 3 items)';
+                    } elseif (!is_array($result['key_points']) || count($result['key_points']) < 3) {
+                        $error = 'Invalid key_points in response (must be array with at least 3 items)';
+                    } elseif (!is_array($result['keywords']) || count($result['keywords']) < 1) {
+                        $error = 'Invalid keywords in response (must be array with at least 1 item)';
                     } else {
-                        // Validate key_points array contents
+                        // Validate key_points array contents (take first 5 if more are provided)
+                        $result['key_points'] = array_slice($result['key_points'], 0, 5);
                         foreach ($result['key_points'] as $point) {
                             if (!is_string($point) || empty($point)) {
                                 $error = 'Invalid key point in response';
@@ -231,7 +232,8 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) ||
                             }
                         }
                         
-                        // Validate keywords array contents
+                        // Validate keywords array contents (take first 3 if more are provided)
+                        $result['keywords'] = array_slice($result['keywords'], 0, 3);
                         if (!$error) {
                             foreach ($result['keywords'] as $keyword) {
                                 if (!is_string($keyword) || empty($keyword)) {
