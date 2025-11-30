@@ -101,6 +101,34 @@ url=https://example.com/article&model=qwen2.5:1.5b&language=en&format=markdown
 }
 ```
 
+### 5. Web Page Summarizer (sum.php)
+Scrapes web pages and returns a structured summary of the most important points in the article.
+
+**Features:**
+- Web scraping with Chrome browser simulation
+- AI-powered content summarization
+- Multilingual output (6 languages)
+- Web interface with real-time results
+- REST API support
+
+**API Usage:**
+```http
+POST /sum.php
+Content-Type: application/x-www-form-urlencoded
+
+url=https://example.com/article&model=qwen2.5:1.5b&language=en
+```
+
+**Response:**
+```json
+{
+  "title": "article title",
+  "summary": "main summary",
+  "key_points": ["point 1", "point 2", ...],
+  "keywords": ["keyword1", "keyword2", ...]
+}
+```
+
 ## Requirements
 
 - PHP 7.0+
