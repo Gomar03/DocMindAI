@@ -82,10 +82,10 @@ if (!isset($DEFAULT_TEXT_MODEL)) {
 }
 
 /**
- * Get selected model and language from POST data, cookies, or use defaults
+ * Get selected model and language from POST/GET data, cookies, or use defaults
  */
-$MODEL = isset($_POST['model']) ? $_POST['model'] : (isset($_COOKIE['sum-model']) ? $_COOKIE['sum-model'] : $DEFAULT_TEXT_MODEL);
-$LANGUAGE = isset($_POST['language']) ? $_POST['language'] : (isset($_COOKIE['sum-language']) ? $_COOKIE['sum-language'] : 'en');
+$MODEL = isset($_POST['model']) ? $_POST['model'] : (isset($_GET['model']) ? $_GET['model'] : (isset($_COOKIE['sum-model']) ? $_COOKIE['sum-model'] : $DEFAULT_TEXT_MODEL));
+$LANGUAGE = isset($_POST['language']) ? $_POST['language'] : (isset($_GET['language']) ? $_GET['language'] : (isset($_COOKIE['sum-language']) ? $_COOKIE['sum-language'] : 'en'));
 
 /**
  * Validate model selection
@@ -158,16 +158,17 @@ $processing = false;
 $is_api_request = false;
 
 /**
- * Handle POST request for URL summarization
+ * Handle POST/GET requests for URL summarization
  * Processes both web form submissions and API requests
  * Validates input, scrapes URL, calls AI API, and processes response
  */
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) {
+if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) || 
+    ($_SERVER['REQUEST_METHOD'] === 'GET' && !empty($_GET['url']))) {
     $processing = true;
-    $is_api_request = !isset($_POST['submit']); // If no submit button, it's an API request
+    $is_api_request = (!isset($_POST['submit']) && !isset($_GET['submit'])); // If no submit button, it's an API request
     
     // Sanitize and validate input
-    $url = trim($_POST['url']);
+    $url = trim(isset($_POST['url']) ? $_POST['url'] : $_GET['url']);
     
     // Validate URL format
     if (!filter_var($url, FILTER_VALIDATE_URL)) {
