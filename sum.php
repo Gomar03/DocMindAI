@@ -349,30 +349,28 @@ function scrapeUrl($url) {
             <?php if ($result): ?>
                 <article class="result-card">
                     <header class="result-header">
-                        <h2 style="color: #111827; font-size: 20px;"><?php echo htmlspecialchars($result['title']); ?></h2>
+                        <h2><?php echo htmlspecialchars($result['title']); ?></h2>
                     </header>
                     
                     <section>
                         <h3>Summary</h3>
-                        <p><?php echo htmlspecialchars($result['summary']); ?></p>
+                        <p class="summary-text"><?php echo htmlspecialchars($result['summary']); ?></p>
                     </section>
                     
                     <section>
                         <h3>Key Points</h3>
-                        <ul>
+                        <ul class="key-points">
                             <?php foreach ($result['key_points'] as $point): ?>
-                                <li style="margin-bottom: 8px;"><?php echo htmlspecialchars($point); ?></li>
+                                <li><?php echo htmlspecialchars($point); ?></li>
                             <?php endforeach; ?>
                         </ul>
                     </section>
                     
                     <footer>
                         <h3>Keywords</h3>
-                        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
+                        <div class="keywords-container">
                             <?php foreach ($result['keywords'] as $keyword): ?>
-                                <span style="background: #e0e7ff; color: #4f46e5; padding: 4px 12px; border-radius: 20px; font-size: 14px;">
-                                    <?php echo htmlspecialchars($keyword); ?>
-                                </span>
+                                <span class="keyword"><?php echo htmlspecialchars($keyword); ?></span>
                             <?php endforeach; ?>
                         </div>
                     </footer>
