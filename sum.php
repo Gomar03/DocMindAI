@@ -340,7 +340,7 @@ function scrapeUrl($url) {
 
         <main class="content">
             <?php if ($error): ?>
-                <section class="error">
+                <section role="alert" class="error">
                     <strong>⚠️ Error:</strong> <?php echo htmlspecialchars($error); ?>
                 </section>
             <?php endif; ?>
