@@ -346,7 +346,7 @@ function scrapeUrl($url) {
             <?php endif; ?>
             
             <?php if ($result): ?>
-                <article class="result-card">
+                <article>
                     <header>
                         <h2><?php echo htmlspecialchars($result['title']); ?></h2>
                     </header>

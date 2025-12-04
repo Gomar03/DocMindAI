@@ -130,69 +130,12 @@ input:focus, select:focus {
     transform: translateY(0);
 }
 
-.result-card {
+article {
     background: #f9fafb;
     border-radius: 12px;
     padding: 24px;
     margin-bottom: 20px;
     border: 2px solid #e5e7eb;
-}
-
-.result-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-}
-
-.pathology-badge {
-    padding: 6px 16px;
-    border-radius: 20px;
-    font-weight: 600;
-    font-size: 14px;
-}
-
-.pathology-yes {
-    background: #fee2e2;
-    color: #dc2626;
-}
-
-.pathology-no {
-    background: #d1fae5;
-    color: #059669;
-}
-
-.severity-container {
-    margin: 20px 0;
-}
-
-.severity-bar {
-    height: 8px;
-    background: #e5e7eb;
-    border-radius: 4px;
-    overflow: hidden;
-    margin-top: 8px;
-}
-
-.severity-fill {
-    height: 100%;
-    border-radius: 4px;
-    transition: width 0.5s ease;
-}
-
-.severity-label {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 8px;
-    font-size: 14px;
-    color: #6b7280;
-}
-
-.summary-box {
-    background: white;
-    padding: 16px;
-    border-radius: 8px;
-    border-left: 4px solid #667eea;
 }
 
 h3 {
@@ -207,37 +150,37 @@ section {
     margin-bottom: 16px;
 }
 
-.result-card > header {
+article > header {
     margin-bottom: 20px;
 }
 
-.result-card > header h2 {
+article > header h2 {
     color: #111827;
     font-size: 20px;
 }
 
-.result-card > section > p {
+article > section > p {
     font-size: 16px;
     line-height: 1.5;
 }
 
-.result-card > section > ul {
+article > section > ul {
     list-style-type: disc;
     padding-left: 20px;
 }
 
-.result-card > section > ul li {
+article > section > ul li {
     margin-bottom: 8px;
 }
 
-.result-card > footer > div {
+article > footer > div {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
     margin-top: 8px;
 }
 
-.result-card > footer > div span {
+article > footer > div span {
     background: #e0e7ff;
     color: #4f46e5;
     padding: 4px 12px;
