@@ -333,7 +333,7 @@ function scrapeUrl($url) {
 </head>
 <body>
     <div class="container">
-        <hgroup class="header">
+        <hgroup>
             <h1>📝 Web Page Summarizer</h1>
             <p>AI-powered structured summary of web articles</p>
         </hgroup>
