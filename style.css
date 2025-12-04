@@ -162,6 +162,7 @@ article > header h2 {
 article > section > p {
     font-size: 16px;
     line-height: 1.5;
+    text-align: justify;
 }
 
 article > section > ul {
