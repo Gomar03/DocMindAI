@@ -388,7 +388,7 @@ function scrapeUrl($url) {
                         placeholder="https://example.com/article"
                         required
                     >
-                    <small class="file-info">
+                    <small>
                         Enter the full URL of the web page you want to summarize.
                     </small>
                 
@@ -400,7 +400,7 @@ function scrapeUrl($url) {
                             </option>
                         <?php endforeach; ?>
                     </select>
-                    <small class="file-info">
+                    <small>
                         Select the AI model to use for summarization.
                     </small>
                 
@@ -412,7 +412,7 @@ function scrapeUrl($url) {
                             </option>
                         <?php endforeach; ?>
                     </select>
-                    <small class="file-info">
+                    <small>
                         Select the language for the summary output.
                     </small>
                 </fieldset>
