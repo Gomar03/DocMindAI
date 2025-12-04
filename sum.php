@@ -338,7 +338,7 @@ function scrapeUrl($url) {
             <p>AI-powered structured summary of web articles</p>
         </hgroup>
 
-        <main class="content">
+        <main>
             <?php if ($error): ?>
                 <section role="alert" class="error">
                     <strong>⚠️ Error:</strong> <?php echo htmlspecialchars($error); ?>
