@@ -366,7 +366,7 @@ function scrapeUrl($url) {
                         </ul>
                     </section>
                     
-                    <section>
+                    <footer>
                         <h3>Keywords</h3>
                         <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
                             <?php foreach ($result['keywords'] as $keyword): ?>
@@ -375,7 +375,7 @@ function scrapeUrl($url) {
                                 </span>
                             <?php endforeach; ?>
                         </div>
-                    </section>
+                    </footer>
                 </article>
             <?php endif; ?>
 
