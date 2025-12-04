@@ -352,22 +352,22 @@ function scrapeUrl($url) {
                         <h2 style="color: #111827; font-size: 20px;"><?php echo htmlspecialchars($result['title']); ?></h2>
                     </header>
                     
-                    <section class="summary-box">
-                        <h3 class="summary-label">Summary</h3>
-                        <p class="summary-text"><?php echo htmlspecialchars($result['summary']); ?></p>
+                    <section>
+                        <h3>Summary</h3>
+                        <p><?php echo htmlspecialchars($result['summary']); ?></p>
                     </section>
                     
-                    <section style="margin-top: 20px;">
-                        <div class="summary-label">Key Points</div>
-                        <ul style="padding-left: 20px; margin-top: 8px;">
+                    <section>
+                        <h3>Key Points</h3>
+                        <ul>
                             <?php foreach ($result['key_points'] as $point): ?>
                                 <li style="margin-bottom: 8px;"><?php echo htmlspecialchars($point); ?></li>
                             <?php endforeach; ?>
                         </ul>
                     </section>
                     
-                    <section style="margin-top: 20px;">
-                        <div class="summary-label">Keywords</div>
+                    <section>
+                        <h3>Keywords</h3>
                         <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
                             <?php foreach ($result['keywords'] as $keyword): ?>
                                 <span style="background: #e0e7ff; color: #4f46e5; padding: 4px 12px; border-radius: 20px; font-size: 14px;">
