@@ -71,23 +71,6 @@ include 'common.php';
                 </a>
             </section>
         </main>
-        
-        <footer>
-            <section style="margin-top: 40px; text-align: center;">
-                <h3>Configuration</h3>
-                <p style="margin-top: 12px;">
-                    All tools use a common configuration file. Create a <code>config.php</code> file with your AI API settings:
-                </p>
-                <pre style="background: #eff6ff; padding: 16px; border-radius: 8px; text-align: left; margin: 16px auto; max-width: 500px; font-size: 0.9rem;">
-&lt;?php
-$LLM_API_ENDPOINT = 'http://127.0.0.1:11434/v1';
-$LLM_API_KEY = '';
-$DEFAULT_TEXT_MODEL = 'qwen2.5:1.5b';
-$DEFAULT_VISION_MODEL = 'gemma3:4b';
-$LLM_API_FILTER = '/free/';
-?&gt;</pre>
-            </section>
-        </footer>
     </div>
 </body>
 </html>
