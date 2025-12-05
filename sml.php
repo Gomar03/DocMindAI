@@ -440,23 +440,17 @@ function fetchArticleDetails($ids) {
             <?php endif; ?>
             
             <?php if ($result): ?>
-                <article>
-                    <header>
-                        <h2>Search Results</h2>
-                    </header>
-                    
                     <?php foreach ($result as $index => $article): ?>
-                    <article class="diagnosis-item">
+                <article class="diagnosis-item">
+                    <header>
                         <h3>
                             <?php echo ($index + 1) . '. ' . htmlspecialchars($article['title']); ?>
                         </h3>
-                        
-                        <div>
                             <p><strong>Authors:</strong> <?php echo htmlspecialchars(implode(', ', $article['authors'])); ?></p>
                             <p><strong>Journal:</strong> <?php echo htmlspecialchars($article['journal']); ?> (<?php echo htmlspecialchars($article['year']); ?>)</p>
                             <p><strong>PMID:</strong> <?php echo htmlspecialchars($article['pmid']); ?></p>
-                        </div>
-                        
+                    </header>
+                    <main>
                         <p><?php echo htmlspecialchars($article['summary']); ?></p>
                         
                         <div>
@@ -472,12 +466,9 @@ function fetchArticleDetails($ids) {
                             <h4>Methodology:</h4>
                             <p><?php echo htmlspecialchars($article['methodology']); ?></p>
                         </div>
-                    </article>
-                    <?php if ($index < count($result) - 1): ?>
-                        <hr style="margin: 24px 0; border: none; border-top: 1px solid #e5e7eb;">
-                    <?php endif; ?>
-                    <?php endforeach; ?>
+                    </main>
                 </article>
+                    <?php endforeach; ?>
             <?php endif; ?>
 
             <form method="POST" action="" id="literatureForm">
