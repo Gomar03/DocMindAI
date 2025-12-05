@@ -79,11 +79,11 @@ if (!isset($DEFAULT_TEXT_MODEL)) {
 }
 
 /**
- * Get selected model, language, and format from POST data, cookies, or use defaults
+ * Get selected model, language, and format from POST/GET data, cookies, or use defaults
  */
-$MODEL = isset($_POST['model']) ? $_POST['model'] : (isset($_COOKIE['scp-model']) ? $_COOKIE['scp-model'] : $DEFAULT_TEXT_MODEL);
-$LANGUAGE = isset($_POST['language']) ? $_POST['language'] : (isset($_COOKIE['scp-language']) ? $_COOKIE['scp-language'] : 'en');
-$FORMAT = isset($_POST['format']) ? $_POST['format'] : (isset($_COOKIE['scp-format']) ? $_COOKIE['scp-format'] : 'markdown');
+$MODEL = isset($_POST['model']) ? $_POST['model'] : (isset($_GET['model']) ? $_GET['model'] : (isset($_COOKIE['scp-model']) ? $_COOKIE['scp-model'] : $DEFAULT_TEXT_MODEL));
+$LANGUAGE = isset($_POST['language']) ? $_POST['language'] : (isset($_GET['language']) ? $_GET['language'] : (isset($_COOKIE['scp-language']) ? $_COOKIE['scp-language'] : 'en'));
+$FORMAT = isset($_POST['format']) ? $_POST['format'] : (isset($_GET['format']) ? $_GET['format'] : (isset($_COOKIE['scp-format']) ? $_COOKIE['scp-format'] : 'markdown'));
 
 /**
  * Validate model selection
@@ -160,16 +160,17 @@ $processing = false;
 $is_api_request = false;
 
 /**
- * Handle POST request for URL scraping
+ * Handle POST/GET requests for URL scraping
  * Processes both web form submissions and API requests
  * Validates input, scrapes URL, calls AI API, and processes response
  */
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) {
+if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) || 
+    ($_SERVER['REQUEST_METHOD'] === 'GET' && !empty($_GET['url']))) {
     $processing = true;
-    $is_api_request = !isset($_POST['submit']); // If no submit button, it's an API request
+    $is_api_request = (!isset($_POST['submit']) && !isset($_GET['submit'])); // If no submit button, it's an API request
     
     // Sanitize and validate input
-    $url = trim($_POST['url']);
+    $url = trim(isset($_POST['url']) ? $_POST['url'] : $_GET['url']);
     
     // Validate URL format
     if (!filter_var($url, FILTER_VALIDATE_URL)) {
@@ -295,45 +296,42 @@ function scrapeUrl($url) {
 </head>
 <body>
     <div class="container">
-        <div class="header">
+        <hgroup>
             <h1>🔗 Simple Content Parser</h1>
             <p>AI-powered web page content extractor</p>
-        </div>
+        </hgroup>
 
-        <div class="content">
+        <main>
             <?php if ($error): ?>
                 <div class="error">
                     <strong>⚠️ Error:</strong> <?php echo htmlspecialchars($error); ?>
-                </div>
-            <?php endif; ?>
+            </section>
             
             <?php if ($result): ?>
-                <div class="result-card">
-                    <div class="result-header">
-                        <h2 style="color: #111827; font-size: 20px;">Markdown / DokuWiki Content</h2>
-                    </div>
+                <article>
+                    <header>
+                        <h2>Markdown / DokuWiki Content</h2>
+                    </header>
                     
                     <textarea class="markdown-result" readonly><?php echo htmlspecialchars($result); ?></textarea>
-                </div>
+                </article>
             <?php endif; ?>
 
             <form method="POST" action="" id="scrapingForm">
-                <div class="form-group">
+                <fieldset>
                     <label for="url">Web page URL:</label>
                     <input 
                         type="url" 
                         id="url" 
                         name="url" 
-                        value="<?php echo isset($_POST['url']) ? htmlspecialchars($_POST['url']) : ''; ?>"
+                        value="<?php echo isset($_POST['url']) ? htmlspecialchars($_POST['url']) : (isset($_GET['url']) ? htmlspecialchars($_GET['url']) : ''); ?>"
                         placeholder="https://example.com/article"
                         required
                     >
-                    <div class="file-info">
+                    <small>
                         Enter the full URL of the web page you want to parse.
-                    </div>
-                </div>
+                    </small>
                 
-                <div class="form-group">
                     <label for="format">Output format:</label>
                     <select id="format" name="format">
                         <?php foreach ($AVAILABLE_FORMATS as $value => $label): ?>
@@ -342,9 +340,10 @@ function scrapeUrl($url) {
                             </option>
                         <?php endforeach; ?>
                     </select>
-                </div>
+                    <small>
+                        Select the output format for the parsed content.
+                    </small>
                 
-                <div class="form-group">
                     <label for="model">AI model:</label>
                     <select id="model" name="model">
                         <?php foreach ($AVAILABLE_MODELS as $value => $label): ?>
@@ -353,9 +352,10 @@ function scrapeUrl($url) {
                             </option>
                         <?php endforeach; ?>
                     </select>
-                </div>
+                    <small>
+                        Select the AI model to use for content parsing.
+                    </small>
                 
-                <div class="form-group">
                     <label for="language">Response language:</label>
                     <select id="language" name="language">
                         <?php foreach ($AVAILABLE_LANGUAGES as $value => $label): ?>
@@ -364,7 +364,10 @@ function scrapeUrl($url) {
                             </option>
                         <?php endforeach; ?>
                     </select>
-                </div>
+                    <small>
+                        Select the language for the parsed content output.
+                    </small>
+                </fieldset>
                 
                 <button type="submit" name="submit" value="1" class="btn btn-primary">
                     <?php if ($processing && !$result && !$error): ?>
@@ -377,7 +380,7 @@ function scrapeUrl($url) {
                     🔄 New Parse
                 </button>
             </form>
-        </div>
+        </main>
     </div>
     
     <script>
