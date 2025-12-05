@@ -264,9 +264,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_FILES['image']) || isset(
                         ]
                     ]
                 ]
-            ],
-            'temperature' => 0.1,
-            'max_tokens' => 2048
+            ]
         ];
         
         // Make API request using common function
@@ -287,9 +285,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_FILES['image']) || isset(
                     'messages' => [
                         ['role' => 'system', 'content' => $SUMMARY_SYSTEM_PROMPT],
                         ['role' => 'user', 'content' => "TEXT TO SUMMARIZE:\n" . $result]
-                    ],
-                    'temperature' => 0.3,
-                    'max_tokens' => 300
+                    ]
                 ];
                 
                 // Make summary API request
