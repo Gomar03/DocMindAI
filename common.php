@@ -743,4 +743,17 @@ function processInlineMarkdown($text) {
     
     return $text;
 }
+
+/**
+ * Get the color associated with a probability level
+ * 
+ * @param int $probability Probability percentage (0-100)
+ * @return string Hex color code
+ */
+function getProbabilityColor($probability) {
+    if ($probability >= 80) return '#ef4444'; // red
+    if ($probability >= 60) return '#f59e0b'; // orange
+    if ($probability >= 40) return '#3b82f6'; // blue
+    return '#10b981'; // green
+}
 ?>
