@@ -41,6 +41,12 @@ include 'common.php';
                     <p>Analyze radiology reports and extract key medical information in a structured JSON format.</p>
                 </a>
                 
+                <a href="rdd.php" class="tool-card">
+                    <div class="tool-icon">🩺</div>
+                    <h3>Radiology Differential Diagnosis</h3>
+                    <p>Generate differential diagnoses with supporting information from radiology reports.</p>
+                </a>
+                
                 <a href="dpa.php" class="tool-card">
                     <div class="tool-icon">📋</div>
                     <h3>Discharge Paper Analyzer</h3>
