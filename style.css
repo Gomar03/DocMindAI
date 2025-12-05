@@ -214,6 +214,17 @@ article > section > ul li {
     flex: 1;
 }
 
+.diagnosis-item .diagnosis-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.diagnosis-item .probability-score {
+    font-weight: 600;
+    margin-left: auto;
+}
+
 article > footer > div {
     display: flex;
     flex-wrap: wrap;
