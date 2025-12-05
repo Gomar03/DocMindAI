@@ -39,35 +39,30 @@ include 'common.php';
                     <div class="tool-icon">🔍</div>
                     <h3>Radiology Report Analyzer</h3>
                     <p>Analyze radiology reports and extract key medical information in a structured JSON format.</p>
-                    <div class="btn btn-primary">Access Tool</div>
                 </a>
                 
                 <a href="dpa.php" class="tool-card">
                     <div class="tool-icon">📋</div>
                     <h3>Discharge Paper Analyzer</h3>
                     <p>Analyze patient discharge papers and summarize key medical information for radiology use.</p>
-                    <div class="btn btn-primary">Access Tool</div>
                 </a>
                 
                 <a href="ocr.php" class="tool-card">
                     <div class="tool-icon">📷</div>
                     <h3>Image OCR Tool</h3>
                     <p>Perform OCR on uploaded images and extract text in Markdown format.</p>
-                    <div class="btn btn-primary">Access Tool</div>
                 </a>
                 
                 <a href="scp.php" class="tool-card">
                     <div class="tool-icon">🔗</div>
                     <h3>Simple Content Parser</h3>
                     <p>Scrape web pages and convert them to clean Markdown format using AI processing.</p>
-                    <div class="btn btn-primary">Access Tool</div>
                 </a>
                 
                 <a href="sum.php" class="tool-card">
                     <div class="tool-icon">📝</div>
                     <h3>Web Page Summarizer</h3>
                     <p>Scrape web pages and return a structured summary of the most important points.</p>
-                    <div class="btn btn-primary">Access Tool</div>
                 </a>
             </section>
         </main>
