@@ -162,20 +162,21 @@ $is_api_request = false;
 $is_hupl_request = false;
 
 /**
- * Handle POST request for image OCR
+ * Handle POST/GET requests for image OCR
  * Processes both web form submissions and API requests
  * Validates input, calls AI API, and processes response
  */
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_FILES['image']) || isset($_FILES['file'])) && 
+if (($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_FILES['image']) || isset($_FILES['file'])) && 
     ((isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) || 
-     (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK))) {
+     (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK))) ||
+    ($_SERVER['REQUEST_METHOD'] === 'GET' && !empty($_GET['url']))) {
     
     // Determine which file input is being used
     $file_key = isset($_FILES['file']) ? 'file' : 'image';
     $image_file = $_FILES[$file_key];
     
     $processing = true;
-    $is_api_request = !isset($_POST['submit']); // If no submit button, it's an API request
+    $is_api_request = (!isset($_POST['submit']) && !isset($_GET['submit'])); // If no submit button, it's an API request
     $is_hupl_request = $file_key === 'file'; // Check for hupl-compatible request
     
     // Validate file upload
