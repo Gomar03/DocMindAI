@@ -286,7 +286,9 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) ||
                     
                     <footer>
                         <h3>Summary</h3>
-                        <div class="summary-text"><?php echo htmlspecialchars($result['summary']); ?></div>
+                        <div>
+                            <span><?php echo htmlspecialchars($result['summary']); ?></span>
+                        </div>
                     </footer>
                 </article>
             <?php endif; ?>
