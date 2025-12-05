@@ -446,7 +446,7 @@ function fetchArticleDetails($ids) {
                     </header>
                     
                     <?php foreach ($result as $index => $article): ?>
-                    <section class="diagnosis-item">
+                    <article class="diagnosis-item">
                         <h3>
                             <?php echo ($index + 1) . '. ' . htmlspecialchars($article['title']); ?>
                         </h3>
@@ -472,7 +472,7 @@ function fetchArticleDetails($ids) {
                             <h4>Methodology:</h4>
                             <p><?php echo htmlspecialchars($article['methodology']); ?></p>
                         </div>
-                    </section>
+                    </article>
                     <?php if ($index < count($result) - 1): ?>
                         <hr style="margin: 24px 0; border: none; border-top: 1px solid #e5e7eb;">
                     <?php endif; ?>
