@@ -260,28 +260,26 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) ||
             <?php endif; ?>
             
             <?php if ($result): ?>
-                <div class="result-container">
-                    <div class="result-header">
+                <article>
+                    <header>
                         <h2>Analysis Result</h2>
                         <div>
                             <span class="pathology-badge <?php echo $result['pathologic'] === 'yes' ? 'pathology-yes' : 'pathology-no'; ?>">
                                 <?php echo htmlspecialchars($result['summary']); ?>
                             </span>
                         </div>
-                    </div>
+                    </header>
                     
-                    <div class="result-content">
-                        <div class="severity-section">
-                            <h3>Severity level</h3>
-                            <div style="display: flex; align-items: center; gap: 16px;">
-                                <span style="font-weight: 600; color: <?php echo getSeverityColor($result['severity']); ?>">
-                                    <?php echo getSeverityLabel($result['severity']); ?> (<?php echo $result['severity']; ?>/10)
-                                </span>
-                                <progress class="severity-bar" value="<?php echo $result['severity']; ?>" max="10" data-severity="<?php echo $result['severity']; ?>" style="flex: 1;"></progress>
-                            </div>
+                    <section>
+                        <h3>Severity level</h3>
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                            <span style="font-weight: 600; color: <?php echo getSeverityColor($result['severity']); ?>">
+                                <?php echo getSeverityLabel($result['severity']); ?> (<?php echo $result['severity']; ?>/10)
+                            </span>
+                            <progress class="severity-bar" value="<?php echo $result['severity']; ?>" max="10" data-severity="<?php echo $result['severity']; ?>" style="flex: 1;"></progress>
                         </div>
-                    </div>
-                </div>
+                    </section>
+                </article>
             <?php endif; ?>
 
             <form method="POST" action="" id="analysisForm">
