@@ -116,7 +116,7 @@ TASK:
 - Format the output with clear headings and bullet points where appropriate
 
 OUTPUT FORMAT:
-Plain text with clear formatting. Use headings, bullet points, and short paragraphs to improve readability.
+Plain text with clear formatting. Use headings (h3 to h6 only, no h1 or h2), bullet points, and short paragraphs to improve readability.
 
 RULES:
 - Focus on what the patient needs to know
@@ -126,6 +126,7 @@ RULES:
 - Include practical information when relevant (e.g., what to expect, when to seek help)
 - Do not add information not present in the original content
 - Do not make medical recommendations or diagnoses
+- Use only h3 to h6 heading levels (### to ###### in Markdown)
 - Respond only with the patient-friendly content, without additional text
 
 EXAMPLE:
@@ -133,7 +134,7 @@ EXAMPLE:
 Input: \"The patient presents with acute myocardial infarction secondary to coronary artery occlusion. Percutaneous coronary intervention was performed with stent placement.\"
 
 Output: 
-\"## Heart Attack Treatment
+\"### Heart Attack Treatment
 
 You had a heart attack, which happens when blood flow to part of your heart muscle is blocked. 
 
