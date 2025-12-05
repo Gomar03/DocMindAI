@@ -197,6 +197,11 @@ article > section > ul li {
     margin-bottom: 8px;
 }
 
+.diagnosis-item ul,
+.diagnosis-item li {
+    margin-left: 20px;
+}
+
 article > footer > div {
     display: flex;
     flex-wrap: wrap;
