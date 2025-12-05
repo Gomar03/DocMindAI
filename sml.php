@@ -119,13 +119,15 @@ $SYSTEM_PROMPT = "You are a medical research assistant specializing in summarizi
 
 " . getLanguageInstruction($LANGUAGE) . "
 
+If you find a direct answer to the search query in the article content, include it in the summary section.
+
 OUTPUT FORMAT (JSON):
 {
   \"title\": \"paper title\",
   \"authors\": [\"author1\", \"author2\", \"author3\"],
   \"journal\": \"journal name\",
   \"year\": 2023,
-  \"summary\": \"2-3 sentence overview of the study\",
+  \"summary\": \"2-3 sentence overview of the study, including direct answer to query if found\",
   \"key_findings\": [\"finding 1\", \"finding 2\", \"finding 3\"],
   \"methodology\": \"brief description of research methods\",
   \"pmid\": \"pubmed id\"
@@ -136,7 +138,7 @@ RULES:
 - \"authors\": Extract all authors (up to 5, then \"et al.\")
 - \"journal\": Extract the journal name
 - \"year\": Extract the publication year
-- \"summary\": Create a 2-3 sentence overview focusing on objectives, methods, and main conclusions
+- \"summary\": Create a 2-3 sentence overview focusing on objectives, methods, and main conclusions. If the article directly answers the search query, include that answer prominently.
 - \"key_findings\": Extract exactly 3 key findings or results from the study
 - \"methodology\": Briefly describe the research methodology (1-2 sentences)
 - \"pmid\": Include the PubMed ID if available
