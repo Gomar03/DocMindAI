@@ -44,10 +44,6 @@ main {
     padding: 30px;
 }
 
-.form-group {
-    margin-bottom: 20px;
-}
-
 label {
     display: block;
     font-weight: 600;
@@ -201,16 +197,6 @@ article > footer > div span {
     border-left: 4px solid #dc2626;
 }
 
-.config-info {
-    background: #eff6ff;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 12px;
-    color: #1e40af;
-    margin-bottom: 20px;
-    display: none;
-}
-
 small {
     font-size: 12px;
     color: #6b7280;
@@ -291,16 +277,6 @@ small {
     background-color: var(--progress-color, #3b82f6);
     border-radius: 6px;
     transition: width 0.5s ease;
-}
-
-.summary-text {
-    background: white;
-    padding: 16px;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
-    font-size: 16px;
-    line-height: 1.5;
-    margin-top: 8px;
 }
 
 @keyframes spin {
