@@ -299,6 +299,10 @@ small {
     margin-left: 20px;
 }
 
+article ul {
+    margin-left: 20px;
+}
+
 .markdown-result h3 {
     font-size: 18px;
     font-weight: 700;
