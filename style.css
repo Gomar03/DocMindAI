@@ -158,6 +158,12 @@ article {
     border: 2px solid #e5e7eb;
 }
 
+article > header,
+article > main,
+article > footer {
+    padding: 0;
+}
+
 h3 {
     font-size: 12px;
     text-transform: uppercase;
