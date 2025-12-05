@@ -353,67 +353,57 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_FILES['image']) || isset(
 </head>
 <body>
     <div class="container">
-        <div class="header">
+        <hgroup>
             <h1>📷 Image OCR Tool</h1>
             <p>AI-powered optical character recognition</p>
-        </div>
+        </hgroup>
 
-        <div class="content">
-            <form method="POST" action="" id="ocrForm" enctype="multipart/form-data">
-                <?php if ($error): ?>
-                    <div class="error">
-                        <strong>⚠️ Error:</strong> <?php echo htmlspecialchars($error); ?>
-                    </div>
+        <main>
+            <?php if ($error): ?>
+                <section role="alert" class="error">
+                    <strong>⚠️ Error:</strong> <?php echo htmlspecialchars($error); ?>
+                </section>
+            <?php endif; ?>
+            
+            <?php if ($result): ?>
+                <?php if ($summary): ?>
+                <article>
+                    <header>
+                        <h2>📄 Summary</h2>
+                    </header>
+                    
+                    <section>
+                        <p><?php echo htmlspecialchars($summary); ?></p>
+                    </section>
+                </article>
                 <?php endif; ?>
                 
-                <?php if ($result): ?>
-                    <?php if ($summary): ?>
-                    <div class="result-card">
-                        <div class="result-header">
-                            <h2 style="color: #111827; font-size: 20px;">📄 Summary</h2>
-                        </div>
-                        
-                        <div class="summary-box">
-                            <div class="summary-text"><?php echo htmlspecialchars($summary); ?></div>
-                        </div>
-                    </div>
-                    <?php endif; ?>
+                <article>
+                    <header>
+                        <h2>🔍 OCR Result</h2>
+                    </header>
                     
-                    <div class="result-card">
-                        <div class="result-header">
-                            <h2 style="color: #111827; font-size: 20px;">🔍 OCR Result</h2>
-                        </div>
-                        
-                        <textarea class="markdown-result" readonly><?php echo htmlspecialchars($result); ?></textarea>
-                    </div>
-                    
-                    <?php if (isset($preprocessed_image_base64)): ?>
-                    <div class="result-card">
-                        <div class="result-header">
-                            <h2 style="color: #111827; font-size: 20px;">Preprocessed Image</h2>
-                        </div>
+                    <textarea class="markdown-result" readonly><?php echo htmlspecialchars($result); ?></textarea>
+                </article>
+                
+                <?php if (isset($preprocessed_image_base64)): ?>
+                <article>
+                    <header>
+                        <h2>Preprocessed Image</h2>
+                    </header>
+                    <section>
                         <div class="preprocessed-image-container">
                             <img src="data:image/png;base64,<?php echo $preprocessed_image_base64; ?>" 
                                  alt="Preprocessed image for OCR" 
                                  class="preprocessed-image">
                         </div>
-                    </div>
-                    <?php endif; ?>
+                    </section>
+                </article>
                 <?php endif; ?>
-                
-                <?php if ($is_api_request && $result): ?>
-                <div class="result-card">
-                    <div class="result-header">
-                        <h2 style="color: #111827; font-size: 20px;">📄 Summary</h2>
-                    </div>
-                    
-                    <div class="summary-box">
-                        <div class="summary-text"><?php echo htmlspecialchars($summary ?? 'No summary available'); ?></div>
-                    </div>
-                </div>
-                <?php endif; ?>
+            <?php endif; ?>
 
-                <div class="form-group">
+            <form method="POST" action="" id="ocrForm" enctype="multipart/form-data">
+                <fieldset>
                     <label for="image">Image file:</label>
                     <input 
                         type="file" 
@@ -422,12 +412,10 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_FILES['image']) || isset(
                         accept="image/jpeg,image/png,image/gif,image/webp,application/pdf"
                         required
                     >
-                    <div class="file-info">
+                    <small>
                         Supported formats: JPEG, PNG, GIF, WebP, PDF. Maximum size: 10MB.
-                    </div>
-                </div>
+                    </small>
 
-                <div class="form-group">
                     <label for="model">AI model:</label>
                     <select id="model" name="model">
                         <?php foreach ($AVAILABLE_MODELS as $value => $label): ?>
@@ -436,9 +424,10 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_FILES['image']) || isset(
                             </option>
                         <?php endforeach; ?>
                     </select>
-                </div>
+                    <small>
+                        Select the AI model to use for OCR.
+                    </small>
                 
-                <div class="form-group">
                     <label for="language">Response language:</label>
                     <select id="language" name="language">
                         <?php foreach ($AVAILABLE_LANGUAGES as $value => $label): ?>
@@ -447,7 +436,10 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_FILES['image']) || isset(
                             </option>
                         <?php endforeach; ?>
                     </select>
-                </div>
+                    <small>
+                        Select the language for the OCR output.
+                    </small>
+                </fieldset>
                 
                 <button type="submit" name="submit" value="1" class="btn btn-primary">
                     <?php if ($processing && !$result && !$error): ?>
@@ -460,9 +452,9 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_FILES['image']) || isset(
                     🔄 New OCR
                 </button>
             </form>
-        </div>
+        </main>
     </div>
-    
+
     <script>
         function clearForm() {
             document.getElementById('image').value = '';
