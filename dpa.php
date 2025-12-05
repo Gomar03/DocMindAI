@@ -272,13 +272,13 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) ||
                     
                     <div class="result-content">
                         <div class="severity-section">
-                            <div class="severity-header">
-                                <h3>Severity Level</h3>
-                                <span class="severity-score" style="color: <?php echo getSeverityColor($result['severity']); ?>">
+                            <h3>Severity level</h3>
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <span style="font-weight: 600; color: <?php echo getSeverityColor($result['severity']); ?>">
                                     <?php echo getSeverityLabel($result['severity']); ?> (<?php echo $result['severity']; ?>/10)
                                 </span>
+                                <progress class="severity-bar" value="<?php echo $result['severity']; ?>" max="10" data-severity="<?php echo $result['severity']; ?>" style="flex: 1;"></progress>
                             </div>
-                            <progress class="severity-bar" value="<?php echo $result['severity']; ?>" max="10" data-severity="<?php echo $result['severity']; ?>"></progress>
                         </div>
                     </div>
                 </div>
