@@ -467,51 +467,156 @@ function callLLMApi($api_endpoint_chat, $data, $api_key = '') {
  * @return string HTML output
  */
 function markdownToHtml($markdown) {
-    // Convert headers (# Header)
-    $markdown = preg_replace('/^# (.*$)/m', '<h1>$1</h1>', $markdown);
-    $markdown = preg_replace('/^## (.*$)/m', '<h2>$1</h2>', $markdown);
-    $markdown = preg_replace('/^### (.*$)/m', '<h3>$1</h3>', $markdown);
+    // Normalize line endings
+    $markdown = str_replace(["\r\n", "\r"], "\n", $markdown);
     
-    // Convert bold (**bold** or __bold__)
-    $markdown = preg_replace('/\*\*(.*?)\*\*/', '<strong>$1</strong>', $markdown);
-    $markdown = preg_replace('/__(.*?)__/', '<strong>$1</strong>', $markdown);
+    // Escape HTML entities first
+    $markdown = htmlspecialchars($markdown, ENT_QUOTES, 'UTF-8');
     
-    // Convert italic (*italic* or _italic_)
-    $markdown = preg_replace('/\*(.*?)\*/', '<em>$1</em>', $markdown);
-    $markdown = preg_replace('/_(.*?)_/', '<em>$1</em>', $markdown);
+    // Split into lines for processing
+    $lines = explode("\n", $markdown);
+    $html = [];
+    $inCodeBlock = false;
+    $inList = false;
+    $listType = '';
     
-    // Convert inline code (`code`)
-    $markdown = preg_replace('/`(.*?)`/', '<code>$1</code>', $markdown);
+    for ($i = 0; $i < count($lines); $i++) {
+        $line = $lines[$i];
+        $trimmed = trim($line);
+        
+        // Code blocks (```)
+        if (preg_match('/^```/', $trimmed)) {
+            if ($inCodeBlock) {
+                $html[] = '</code></pre>';
+                $inCodeBlock = false;
+            } else {
+                if ($inList) {
+                    $html[] = $listType === 'ul' ? '</ul>' : '</ol>';
+                    $inList = false;
+                }
+                $html[] = '<pre><code>';
+                $inCodeBlock = true;
+            }
+            continue;
+        }
+        
+        if ($inCodeBlock) {
+            $html[] = $line;
+            continue;
+        }
+        
+        // Empty lines
+        if ($trimmed === '') {
+            if ($inList) {
+                $html[] = $listType === 'ul' ? '</ul>' : '</ol>';
+                $inList = false;
+            }
+            continue;
+        }
+        
+        // Headers
+        if (preg_match('/^(#{1,6})\s+(.+)$/', $trimmed, $matches)) {
+            if ($inList) {
+                $html[] = $listType === 'ul' ? '</ul>' : '</ol>';
+                $inList = false;
+            }
+            $level = strlen($matches[1]);
+            $text = processInlineMarkdown($matches[2]);
+            $html[] = "<h$level>$text</h$level>";
+            continue;
+        }
+        
+        // Unordered lists
+        if (preg_match('/^[\*\-]\s+(.+)$/', $trimmed, $matches)) {
+            if (!$inList || $listType !== 'ul') {
+                if ($inList && $listType === 'ol') {
+                    $html[] = '</ol>';
+                }
+                $html[] = '<ul>';
+                $inList = true;
+                $listType = 'ul';
+            }
+            $text = processInlineMarkdown($matches[1]);
+            $html[] = "<li>$text</li>";
+            continue;
+        }
+        
+        // Ordered lists
+        if (preg_match('/^\d+\.\s+(.+)$/', $trimmed, $matches)) {
+            if (!$inList || $listType !== 'ol') {
+                if ($inList && $listType === 'ul') {
+                    $html[] = '</ul>';
+                }
+                $html[] = '<ol>';
+                $inList = true;
+                $listType = 'ol';
+            }
+            $text = processInlineMarkdown($matches[1]);
+            $html[] = "<li>$text</li>";
+            continue;
+        }
+        
+        // Blockquotes
+        if (preg_match('/^>\s+(.+)$/', $trimmed, $matches)) {
+            if ($inList) {
+                $html[] = $listType === 'ul' ? '</ul>' : '</ol>';
+                $inList = false;
+            }
+            $text = processInlineMarkdown($matches[1]);
+            $html[] = "<blockquote>$text</blockquote>";
+            continue;
+        }
+        
+        // Horizontal rule
+        if (preg_match('/^(\*{3,}|-{3,}|_{3,})$/', $trimmed)) {
+            if ($inList) {
+                $html[] = $listType === 'ul' ? '</ul>' : '</ol>';
+                $inList = false;
+            }
+            $html[] = '<hr>';
+            continue;
+        }
+        
+        // Regular paragraph
+        if ($inList) {
+            $html[] = $listType === 'ul' ? '</ul>' : '</ol>';
+            $inList = false;
+        }
+        $text = processInlineMarkdown($trimmed);
+        $html[] = "<p>$text</p>";
+    }
     
-    // Convert code blocks (```code```)
-    $markdown = preg_replace('/```(.*?)```/s', '<pre><code>$1</code></pre>', $markdown);
+    // Close any open lists
+    if ($inList) {
+        $html[] = $listType === 'ul' ? '</ul>' : '</ol>';
+    }
     
-    // Convert links ([text](url))
-    $markdown = preg_replace('/\[(.*?)\]\((.*?)\)/', '<a href="$2">$1</a>', $markdown);
+    // Close any open code blocks
+    if ($inCodeBlock) {
+        $html[] = '</code></pre>';
+    }
     
-    // Convert unordered lists (* item or - item)
-    $markdown = preg_replace('/^\* (.*$)/m', '<li>$1</li>', $markdown);
-    $markdown = preg_replace('/^- (.*$)/m', '<li>$1</li>', $markdown);
-    // Wrap consecutive <li> elements in <ul>
-    $markdown = preg_replace('/(<li>.*<\/li>(\s*<li>.*<\/li>)*)/s', '<ul>$1</ul>', $markdown);
+    return implode("\n", $html);
+}
+
+function processInlineMarkdown($text) {
+    // Bold (**text** or __text__)
+    $text = preg_replace('/\*\*(.+?)\*\*/', '<strong>$1</strong>', $text);
+    $text = preg_replace('/__(.+?)__/', '<strong>$1</strong>', $text);
     
-    // Convert paragraphs (empty line separated text)
-    $markdown = preg_replace('/\n\s*\n/', '</p><p>', $markdown);
-    $markdown = '<p>' . $markdown . '</p>';
+    // Italic (*text* or _text_)
+    $text = preg_replace('/\*(.+?)\*/', '<em>$1</em>', $text);
+    $text = preg_replace('/_(.+?)_/', '<em>$1</em>', $text);
     
-    // Handle line breaks within paragraphs - only replace newlines that are inside paragraph tags
-    $markdown = preg_replace_callback('/<p>(.*?)<\/p>/s', function($matches) {
-        // Replace single newlines with <br> but not multiple newlines (which would be paragraph breaks)
-        $content = $matches[1];
-        // Replace single newlines with <br>, but preserve paragraph structure
-        $content = preg_replace('/([^\n])\n([^\n])/s', '$1<br>$2', $content);
-        return '<p>' . $content . '</p>';
-    }, $markdown);
+    // Inline code (`code`)
+    $text = preg_replace('/`(.+?)`/', '<code>$1</code>', $text);
     
-    // Remove empty paragraphs
-    $markdown = preg_replace('/<p>\s*<\/p>/', '', $markdown);
-    $markdown = preg_replace('/<p>\s*<br\s*\/?>\s*<\/p>/', '', $markdown);
+    // Links [text](url)
+    $text = preg_replace('/\[(.+?)\]\((.+?)\)/', '<a href="$2">$1</a>', $text);
     
-    return $markdown;
+    // Images ![alt](url)
+    $text = preg_replace('/!\[(.+?)\]\((.+?)\)/', '<img src="$2" alt="$1">', $text);
+    
+    return $text;
 }
 ?>
