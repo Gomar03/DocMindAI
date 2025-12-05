@@ -286,6 +286,11 @@ small {
     line-height: 1.5;
 }
 
+.markdown-result ul,
+.markdown-result li {
+    margin-left: 20px;
+}
+
 .pathology-badge {
     display: inline-block;
     padding: 6px 12px;
