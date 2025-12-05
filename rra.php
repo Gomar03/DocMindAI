@@ -166,9 +166,6 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) ||
     // Sanitize and validate input
     $report = trim(isset($_POST['report']) ? $_POST['report'] : $_GET['report']);
     
-    // Sanitize and validate input
-    $report = trim($_POST['report']);
-    
     // Validate report length (prevent extremely large inputs)
     if (strlen($report) > 10000) {
         $error = 'The report is too long. Maximum 10000 characters allowed.';
