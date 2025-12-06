@@ -82,6 +82,12 @@ include 'common.php';
                     <h3>Search Medical Literature</h3>
                     <p>Search medical literature databases and get AI-summarized research papers.</p>
                 </a>
+                
+                <a href="chat.php" class="tool-card">
+                    <div class="tool-icon">💬</div>
+                    <h3>Medical Chat Assistant</h3>
+                    <p>Interact directly with an AI medical assistant for real-time medical queries.</p>
+                </a>
             </section>
         </main>
     </div>
