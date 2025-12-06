@@ -37,10 +37,19 @@ if (!isset($CHAT_HISTORY_LENGTH)) {
     $CHAT_HISTORY_LENGTH = 10;
 }
 
+// Define available AI personalities
+$AVAILABLE_PERSONALITIES = [
+    'medical_assistant' => 'Medical Assistant',
+    'general_practitioner' => 'General Practitioner',
+    'specialist' => 'Medical Specialist',
+    'medical_researcher' => 'Medical Researcher'
+];
+
 // Configuration
 $max_history = $CHAT_HISTORY_LENGTH;
 $model = isset($_POST['model']) ? $_POST['model'] : (isset($_GET['model']) ? $_GET['model'] : (isset($_COOKIE['chat_model']) ? $_COOKIE['chat_model'] : $DEFAULT_TEXT_MODEL));
 $language = isset($_POST['language']) ? $_POST['language'] : (isset($_GET['language']) ? $_GET['language'] : (isset($_COOKIE['chat_language']) ? $_COOKIE['chat_language'] : 'en'));
+$personality = isset($_POST['personality']) ? $_POST['personality'] : (isset($_GET['personality']) ? $_GET['personality'] : (isset($_COOKIE['chat_personality']) ? $_COOKIE['chat_personality'] : 'medical_assistant'));
 
 // Validate model selection
 if (!array_key_exists($model, $AVAILABLE_MODELS)) {
@@ -50,6 +59,11 @@ if (!array_key_exists($model, $AVAILABLE_MODELS)) {
 // Validate language selection
 if (!array_key_exists($language, $AVAILABLE_LANGUAGES)) {
     $language = 'en'; // Default to English
+}
+
+// Validate personality selection
+if (!array_key_exists($personality, $AVAILABLE_PERSONALITIES)) {
+    $personality = 'medical_assistant'; // Default to medical assistant
 }
 
 // Check if this is an API request
@@ -95,12 +109,15 @@ if ($is_post_request) {
     $api_key = $LLM_API_KEY;
     $api_endpoint = $LLM_API_ENDPOINT;
     
-    // Add medical context instruction
-    $medical_instruction = "You are a medical assistant. Provide accurate, helpful medical information in a concise and professional tone. Avoid giving specific medical advice. Always recommend consulting with healthcare professionals for personal medical concerns. " . getLanguageInstruction($language);
+    // Get personality instruction
+    $personality_instruction = getPersonalityInstruction($personality, $language);
+    
+    // Add context instruction
+    $context_instruction = $personality_instruction . " " . getLanguageInstruction($language);
     
     // Prepare messages for API
     $api_messages = [
-        ['role' => 'system', 'content' => $medical_instruction]
+        ['role' => 'system', 'content' => $context_instruction]
     ];
     
     // Add history
@@ -137,7 +154,8 @@ if ($is_post_request) {
         'reply' => $reply,
         'history' => $history,
         'model' => $model,
-        'language' => $language
+        'language' => $language,
+        'personality' => $personality
     ], true);
     exit;
 }
@@ -251,6 +269,16 @@ if ($is_post_request) {
                 <select id="model-selector" name="model">
                     <?php foreach ($AVAILABLE_MODELS as $value => $label): ?>
                         <option value="<?php echo htmlspecialchars($value); ?>" <?php echo ($model === $value) ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($label); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+            <label>
+                Personality:
+                <select id="personality-selector" name="personality">
+                    <?php foreach ($AVAILABLE_PERSONALITIES as $value => $label): ?>
+                        <option value="<?php echo htmlspecialchars($value); ?>" <?php echo ($personality === $value) ? 'selected' : ''; ?>>
                             <?php echo htmlspecialchars($label); ?>
                         </option>
                     <?php endforeach; ?>
@@ -389,20 +417,23 @@ if ($is_post_request) {
         
         function saveConfig() {
             const model = document.getElementById('model-selector').value;
+            const personality = document.getElementById('personality-selector').value;
             const language = document.getElementById('language-selector').value;
             
             // Save to cookies
             document.cookie = `chat_model=${model}; path=/`;
+            document.cookie = `chat_personality=${personality}; path=/`;
             document.cookie = `chat_language=${language}; path=/`;
             
             alert('Settings saved! Refresh the page to apply changes.');
         }
         
-        // Update form submission to include model and language selection
+        // Update form submission to include model, personality, and language selection
         function sendMessage() {
             const input = document.getElementById('message-input');
             const message = input.value.trim();
             const model = document.getElementById('model-selector').value;
+            const personality = document.getElementById('personality-selector').value;
             const language = document.getElementById('language-selector').value;
             
             if (!message) return;
@@ -428,6 +459,7 @@ if ($is_post_request) {
                     message: message,
                     history: chatHistory,
                     model: model,
+                    personality: personality,
                     language: language
                 })
             })
@@ -446,9 +478,12 @@ if ($is_post_request) {
                     // Update chat history
                     chatHistory = data.history;
                     
-                    // Update model and language selectors if changed
+                    // Update model, personality, and language selectors if changed
                     if (data.model) {
                         document.getElementById('model-selector').value = data.model;
+                    }
+                    if (data.personality) {
+                        document.getElementById('personality-selector').value = data.personality;
                     }
                     if (data.language) {
                         document.getElementById('language-selector').value = data.language;
