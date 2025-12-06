@@ -42,7 +42,8 @@ $AVAILABLE_PERSONALITIES = [
     'medical_assistant' => 'Medical Assistant',
     'general_practitioner' => 'General Practitioner',
     'specialist' => 'Medical Specialist',
-    'medical_researcher' => 'Medical Researcher'
+    'medical_researcher' => 'Medical Researcher',
+    'skippy' => 'Skippy the Magnificent'
 ];
 
 // Configuration
