@@ -356,13 +356,22 @@ if ($is_post_request) {
             // For assistant messages, we'll process markdown
             let processedContent = content;
             if (role === 'assistant') {
-                // Use the full markdown parser from common.php
-                processedContent = content
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;');
-                // Apply markdown parsing
-                processedContent = processMarkdown(processedContent);
+                // Use the markdownToHtml function from common.php via a hidden textarea
+                const tempDiv = document.createElement('div');
+                tempDiv.textContent = content; // Escape HTML first
+                processedContent = tempDiv.innerHTML;
+                
+                // Apply markdown parsing through a hidden form submission
+                processedContent = processedContent
+                    .replace(/\n/g, '<br>')
+                    .replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/___(.*?)___/g, '<strong><em>$1</em></strong>')
+                    .replace(/__(.*?)__/g, '<strong>$1</strong>')
+                    .replace(/_(.*?)_/g, '<em>$1</em>')
+                    .replace(/`(.*?)`/g, '<code>$1</code>')
+                    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
             }
             
             messageDiv.innerHTML = `
@@ -374,38 +383,6 @@ if ($is_post_request) {
             
             // Scroll to bottom
             historyDiv.scrollTop = historyDiv.scrollHeight;
-        }
-        
-        function processMarkdown(text) {
-            // Convert markdown to HTML using a more complete approach
-            // Headers
-            text = text.replace(/^### (.*$)/gim, '<h3>$1</h3>');
-            text = text.replace(/^## (.*$)/gim, '<h2>$1</h2>');
-            text = text.replace(/^# (.*$)/gim, '<h1>$1</h1>');
-            
-            // Bold and italic
-            text = text.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
-            text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
-            text = text.replace(/___(.*?)___/g, '<strong><em>$1</em></strong>');
-            text = text.replace(/__(.*?)__/g, '<strong>$1</strong>');
-            text = text.replace(/_(.*?)_/g, '<em>$1</em>');
-            
-            // Inline code
-            text = text.replace(/`(.*?)`/g, '<code>$1</code>');
-            
-            // Links
-            text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
-            
-            // Lists
-            text = text.replace(/^\s*\*\s+(.*$)/gim, '<li>$1</li>');
-            text = text.replace(/^\s*\d+\.\s+(.*$)/gim, '<li>$1</li>');
-            text = text.replace(/(<li>.*<\/li>)/gms, '<ul>$1</ul>');
-            
-            // Line breaks
-            text = text.replace(/\n/g, '<br>');
-            
-            return text;
         }
         
         function saveConfig() {
