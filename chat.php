@@ -34,10 +34,16 @@ if (!isset($DEFAULT_TEXT_MODEL)) {
 // Configuration
 $max_history = isset($_COOKIE['chat_history_limit']) ? intval($_COOKIE['chat_history_limit']) : 10;
 $model = isset($_POST['model']) ? $_POST['model'] : (isset($_GET['model']) ? $_GET['model'] : (isset($_COOKIE['chat_model']) ? $_COOKIE['chat_model'] : $DEFAULT_TEXT_MODEL));
+$language = isset($_POST['language']) ? $_POST['language'] : (isset($_GET['language']) ? $_GET['language'] : (isset($_COOKIE['chat_language']) ? $_COOKIE['chat_language'] : 'en'));
 
 // Validate model selection
 if (!array_key_exists($model, $AVAILABLE_MODELS)) {
     $model = $DEFAULT_TEXT_MODEL; // Default to a valid model
+}
+
+// Validate language selection
+if (!array_key_exists($language, $AVAILABLE_LANGUAGES)) {
+    $language = 'en'; // Default to English
 }
 
 // Check if this is an API request
@@ -84,7 +90,7 @@ if ($is_post_request) {
     $api_endpoint = $LLM_API_ENDPOINT;
     
     // Add medical context instruction
-    $medical_instruction = "You are a medical assistant. Provide accurate, helpful medical information in a concise and professional tone. Avoid giving specific medical advice. Always recommend consulting with healthcare professionals for personal medical concerns.";
+    $medical_instruction = "You are a medical assistant. Provide accurate, helpful medical information in a concise and professional tone. Avoid giving specific medical advice. Always recommend consulting with healthcare professionals for personal medical concerns. " . getLanguageInstruction($language);
     
     // Prepare messages for API
     $api_messages = [
@@ -123,7 +129,9 @@ if ($is_post_request) {
     // Return response
     sendJsonResponse([
         'reply' => $reply,
-        'history' => $history
+        'history' => $history,
+        'model' => $model,
+        'language' => $language
     ], true);
     exit;
 }
@@ -246,6 +254,16 @@ if ($is_post_request) {
                     <?php endforeach; ?>
                 </select>
             </label>
+            <label>
+                Language:
+                <select id="language-selector" name="language">
+                    <?php foreach ($AVAILABLE_LANGUAGES as $value => $label): ?>
+                        <option value="<?php echo htmlspecialchars($value); ?>" <?php echo ($language === $value) ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($label); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
             <button onclick="saveConfig()">Save Settings</button>
         </div>
         
@@ -338,15 +356,13 @@ if ($is_post_request) {
             // For assistant messages, we'll process markdown
             let processedContent = content;
             if (role === 'assistant') {
-                // Convert markdown to HTML using a simple approach
+                // Use the full markdown parser from common.php
                 processedContent = content
                     .replace(/&/g, '&amp;')
                     .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                    .replace(/`(.*?)`/g, '<code>$1</code>')
-                    .replace(/\n/g, '<br>');
+                    .replace(/>/g, '&gt;');
+                // Apply markdown parsing
+                processedContent = processMarkdown(processedContent);
             }
             
             messageDiv.innerHTML = `
@@ -360,22 +376,57 @@ if ($is_post_request) {
             historyDiv.scrollTop = historyDiv.scrollHeight;
         }
         
+        function processMarkdown(text) {
+            // Convert markdown to HTML using a more complete approach
+            // Headers
+            text = text.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+            text = text.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+            text = text.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+            
+            // Bold and italic
+            text = text.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
+            text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            text = text.replace(/___(.*?)___/g, '<strong><em>$1</em></strong>');
+            text = text.replace(/__(.*?)__/g, '<strong>$1</strong>');
+            text = text.replace(/_(.*?)_/g, '<em>$1</em>');
+            
+            // Inline code
+            text = text.replace(/`(.*?)`/g, '<code>$1</code>');
+            
+            // Links
+            text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+            
+            // Lists
+            text = text.replace(/^\s*\*\s+(.*$)/gim, '<li>$1</li>');
+            text = text.replace(/^\s*\d+\.\s+(.*$)/gim, '<li>$1</li>');
+            text = text.replace(/(<li>.*<\/li>)/gms, '<ul>$1</ul>');
+            
+            // Line breaks
+            text = text.replace(/\n/g, '<br>');
+            
+            return text;
+        }
+        
         function saveConfig() {
             const historyLimit = document.getElementById('history-limit').value;
             const model = document.getElementById('model-selector').value;
+            const language = document.getElementById('language-selector').value;
             
             // Save to cookies
             document.cookie = `chat_history_limit=${historyLimit}; path=/`;
             document.cookie = `chat_model=${model}; path=/`;
+            document.cookie = `chat_language=${language}; path=/`;
             
             alert('Settings saved! Refresh the page to apply changes.');
         }
         
-        // Update form submission to include model selection
+        // Update form submission to include model and language selection
         function sendMessage() {
             const input = document.getElementById('message-input');
             const message = input.value.trim();
             const model = document.getElementById('model-selector').value;
+            const language = document.getElementById('language-selector').value;
             
             if (!message) return;
             
@@ -399,7 +450,8 @@ if ($is_post_request) {
                 body: JSON.stringify({
                     message: message,
                     history: chatHistory,
-                    model: model
+                    model: model,
+                    language: language
                 })
             })
             .then(response => response.json())
@@ -416,6 +468,14 @@ if ($is_post_request) {
                     
                     // Update chat history
                     chatHistory = data.history;
+                    
+                    // Update model and language selectors if changed
+                    if (data.model) {
+                        document.getElementById('model-selector').value = data.model;
+                    }
+                    if (data.language) {
+                        document.getElementById('language-selector').value = data.language;
+                    }
                 }
             })
             .catch(error => {
