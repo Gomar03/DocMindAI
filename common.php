@@ -352,6 +352,29 @@ function extractImagesFromPDF($pdf_path) {
 }
 
 /**
+ * Get human-readable explanation for HTTP error codes
+ * 
+ * @param int $http_code HTTP status code
+ * @return string Explanation of the error
+ */
+function getHttpErrorExplanation($http_code) {
+    $explanations = [
+        400 => 'Bad Request - The request was invalid or cannot be served.',
+        401 => 'Unauthorized - Authentication is required and has failed or not yet been provided.',
+        403 => 'Forbidden - The server understood the request but refuses to authorize it.',
+        404 => 'Not Found - The requested resource could not be found.',
+        408 => 'Request Timeout - The server timed out waiting for the request.',
+        429 => 'Too Many Requests - You have sent too many requests in a given amount of time.',
+        500 => 'Internal Server Error - The server encountered an unexpected condition.',
+        502 => 'Bad Gateway - The server received an invalid response from the upstream server.',
+        503 => 'Service Unavailable - The server is not ready to handle the request.',
+        504 => 'Gateway Timeout - The server did not receive a timely response from the upstream server.'
+    ];
+    
+    return isset($explanations[$http_code]) ? $explanations[$http_code] : "HTTP error $http_code";
+}
+
+/**
  * Fetch available models from the LLM server API
  * 
  * @param string $api_endpoint The API endpoint URL
@@ -376,10 +399,14 @@ function getAvailableModels($api_endpoint, $api_key = '', $filter_regex = '') {
     $response = curl_exec($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     
-    if (curl_errno($ch) || $http_code !== 200) {
+    if (curl_errno($ch)) {
+        $error = 'Connection error: ' . curl_error($ch);
         curl_close($ch);
-        // Return default models if API call fails
-        return [];
+        return ['error' => $error];
+    } elseif ($http_code !== 200) {
+        $error = 'API error: ' . getHttpErrorExplanation($http_code);
+        curl_close($ch);
+        return ['error' => $error];
     }
     
     curl_close($ch);
@@ -387,7 +414,7 @@ function getAvailableModels($api_endpoint, $api_key = '', $filter_regex = '') {
     $response_data = json_decode($response, true);
     
     if (json_last_error() !== JSON_ERROR_NONE || !isset($response_data['data'])) {
-        return [];
+        return ['error' => 'Invalid API response format: ' . json_last_error_msg()];
     }
     
     $models = [];
@@ -444,7 +471,7 @@ function callLLMApi($api_endpoint_chat, $data, $api_key = '') {
         curl_close($ch);
         return ['error' => $error];
     } elseif ($http_code !== 200) {
-        $error = 'API error: HTTP ' . $http_code;
+        $error = 'API error: ' . getHttpErrorExplanation($http_code);
         curl_close($ch);
         return ['error' => $error];
     }
