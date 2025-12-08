@@ -257,52 +257,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Medical Chat Assistant</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E💬%3C/text%3E%3C/svg%3E">
 </head>
 <body>
-    <article class="chat-container">
+    <div class="container">
         <hgroup>
-            <h1>Medical Chat Assistant</h1>
+            <h1>💬 Medical Chat Assistant</h1>
             <p>This assistant provides medical information but should not replace professional medical advice.</p>
         </hgroup>
         
         <main>
+            <?php if ($error): ?>
+                <section role="alert" class="error">
+                    <strong>⚠️ Error:</strong> <?php echo htmlspecialchars($error); ?>
+                </section>
+            <?php endif; ?>
+            
             <section class="config-panel">
                 <header>
                     <h2>Configuration</h2>
                 </header>
                 <fieldset>
-                    <label>
-                        Model:
-                        <select id="model-selector" name="model">
-                            <?php foreach ($AVAILABLE_MODELS as $value => $label): ?>
-                                <option value="<?php echo htmlspecialchars($value); ?>" <?php echo ($model === $value) ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($label); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </label>
-                    <label>
-                        Personality:
-                        <select id="personality-selector" name="personality">
-                            <?php foreach ($AVAILABLE_PERSONALITIES as $value => $label): ?>
-                                <option value="<?php echo htmlspecialchars($value); ?>" <?php echo ($personality === $value) ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($label); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </label>
-                    <label>
-                        Language:
-                        <select id="language-selector" name="language">
-                            <?php foreach ($AVAILABLE_LANGUAGES as $value => $label): ?>
-                                <option value="<?php echo htmlspecialchars($value); ?>" <?php echo ($language === $value) ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($label); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </label>
+                    <label for="model">AI model:</label>
+                    <select id="model" name="model">
+                        <?php foreach ($AVAILABLE_MODELS as $value => $label): ?>
+                            <option value="<?php echo htmlspecialchars($value); ?>" <?php echo ($model === $value) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($label); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <small>
+                        Select the AI model to use for chat.
+                    </small>
+                
+                    <label for="personality">AI personality:</label>
+                    <select id="personality" name="personality">
+                        <?php foreach ($AVAILABLE_PERSONALITIES as $value => $label): ?>
+                            <option value="<?php echo htmlspecialchars($value); ?>" <?php echo ($personality === $value) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($label); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <small>
+                        Select the personality for the AI assistant.
+                    </small>
+                
+                    <label for="language">Response language:</label>
+                    <select id="language" name="language">
+                        <?php foreach ($AVAILABLE_LANGUAGES as $value => $label): ?>
+                            <option value="<?php echo htmlspecialchars($value); ?>" <?php echo ($language === $value) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($label); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <small>
+                        Select the language for the chat responses.
+                    </small>
                 </fieldset>
-                <button onclick="saveConfig()">Save Settings</button>
+                <button onclick="saveConfig()" class="btn btn-secondary">
+                    💾 Save Settings
+                </button>
             </section>
             
             <section class="chat-history" id="chat-history">
@@ -316,14 +330,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 Assistant is typing...
             </div>
             
-            <footer>
-                <div class="input-area">
-                    <input type="text" id="message-input" placeholder="Type your medical question here..." onkeypress="handleKeyPress(event)">
-                    <button id="send-button" onclick="sendMessage()">Send</button>
-                </div>
-            </footer>
+            <form id="chat-form">
+                <fieldset>
+                    <label for="message-input">Your message:</label>
+                    <div class="input-area">
+                        <input type="text" id="message-input" placeholder="Type your medical question here..." onkeypress="handleKeyPress(event)">
+                        <button id="send-button" type="button" class="btn" onclick="sendMessage()">
+                            <?php if ($processing && !$result && !$error): ?>
+                                <span class="loading"></span>
+                            <?php endif; ?>
+                            📤 Send
+                        </button>
+                    </div>
+                    <small>
+                        Press Enter to send your message.
+                    </small>
+                </fieldset>
+                
+                <button type="button" class="btn btn-secondary" onclick="clearChat()">
+                    🔄 New Chat
+                </button>
+            </form>
         </main>
-    </article>
+    </div>
 
     <script>
         let chatHistory = [];
@@ -350,6 +379,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             document.getElementById('typing-indicator').style.display = 'block';
             document.getElementById('send-button').disabled = true;
             
+            // Get current selections
+            const model = document.getElementById('model').value;
+            const personality = document.getElementById('personality').value;
+            const language = document.getElementById('language').value;
+            
             // Send message to server
             fetch('chat.php', {
                 method: 'POST',
@@ -359,7 +393,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 },
                 body: JSON.stringify({
                     message: message,
-                    history: chatHistory
+                    history: chatHistory,
+                    model: model,
+                    personality: personality,
+                    language: language
                 })
             })
             .then(response => response.json())
@@ -376,6 +413,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     
                     // Update chat history
                     chatHistory = data.history;
+                    
+                    // Update model, personality, and language selectors if changed
+                    if (data.model) {
+                        document.getElementById('model').value = data.model;
+                    }
+                    if (data.personality) {
+                        document.getElementById('personality').value = data.personality;
+                    }
+                    if (data.language) {
+                        document.getElementById('language').value = data.language;
+                    }
                 }
             })
             .catch(error => {
@@ -430,9 +478,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         function saveConfig() {
-            const model = document.getElementById('model-selector').value;
-            const personality = document.getElementById('personality-selector').value;
-            const language = document.getElementById('language-selector').value;
+            const model = document.getElementById('model').value;
+            const personality = document.getElementById('personality').value;
+            const language = document.getElementById('language').value;
             
             // Save to cookies
             document.cookie = `chat_model=${model}; path=/`;
@@ -442,75 +490,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             alert('Settings saved! Refresh the page to apply changes.');
         }
         
-        // Update form submission to include model, personality, and language selection
-        function sendMessage() {
-            const input = document.getElementById('message-input');
-            const message = input.value.trim();
-            const model = document.getElementById('model-selector').value;
-            const personality = document.getElementById('personality-selector').value;
-            const language = document.getElementById('language-selector').value;
+        function clearChat() {
+            // Clear chat history
+            chatHistory = [];
             
-            if (!message) return;
-            
-            // Add user message to UI
-            addMessageToUI('user', message);
+            // Clear chat display
+            const historyDiv = document.getElementById('chat-history');
+            historyDiv.innerHTML = '<div class="message assistant-message"><div class="message-header">Assistant</div><div class="message-content">Hello! I\'m your medical assistant. How can I help you today?</div></div>';
             
             // Clear input
-            input.value = '';
+            document.getElementById('message-input').value = '';
             
-            // Show typing indicator
-            document.getElementById('typing-indicator').style.display = 'block';
-            document.getElementById('send-button').disabled = true;
+            // Reset form selections to cookie values or defaults
+            const modelCookie = getCookie('chat_model');
+            const personalityCookie = getCookie('chat_personality');
+            const languageCookie = getCookie('chat_language');
             
-            // Send message to server
-            fetch('chat.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    message: message,
-                    history: chatHistory,
-                    model: model,
-                    personality: personality,
-                    language: language
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Hide typing indicator
-                document.getElementById('typing-indicator').style.display = 'none';
-                document.getElementById('send-button').disabled = false;
-                
-                if (data.error) {
-                    addMessageToUI('assistant', 'Error: ' + data.error);
-                } else {
-                    // Add assistant response to UI
-                    addMessageToUI('assistant', data.reply);
-                    
-                    // Update chat history
-                    chatHistory = data.history;
-                    
-                    // Update model, personality, and language selectors if changed
-                    if (data.model) {
-                        document.getElementById('model-selector').value = data.model;
-                    }
-                    if (data.personality) {
-                        document.getElementById('personality-selector').value = data.personality;
-                    }
-                    if (data.language) {
-                        document.getElementById('language-selector').value = data.language;
-                    }
-                }
-            })
-            .catch(error => {
-                // Hide typing indicator
-                document.getElementById('typing-indicator').style.display = 'none';
-                document.getElementById('send-button').disabled = false;
-                
-                addMessageToUI('assistant', 'Error: ' + error.message);
-            });
+            if (modelCookie) document.getElementById('model').value = modelCookie;
+            if (personalityCookie) document.getElementById('personality').value = personalityCookie;
+            if (languageCookie) document.getElementById('language').value = languageCookie;
+        }
+        
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
         }
     </script>
 </body>
