@@ -260,60 +260,71 @@ if ($is_post_request) {
     </style>
 </head>
 <body>
-    <div class="chat-container">
-        <h1>Medical Chat Assistant</h1>
-        <p>This assistant provides medical information but should not replace professional medical advice.</p>
+    <article class="chat-container">
+        <hgroup>
+            <h1>Medical Chat Assistant</h1>
+            <p>This assistant provides medical information but should not replace professional medical advice.</p>
+        </hgroup>
         
-        <div class="config-panel">
-            <label>
-                Model:
-                <select id="model-selector" name="model">
-                    <?php foreach ($AVAILABLE_MODELS as $value => $label): ?>
-                        <option value="<?php echo htmlspecialchars($value); ?>" <?php echo ($model === $value) ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($label); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </label>
-            <label>
-                Personality:
-                <select id="personality-selector" name="personality">
-                    <?php foreach ($AVAILABLE_PERSONALITIES as $value => $label): ?>
-                        <option value="<?php echo htmlspecialchars($value); ?>" <?php echo ($personality === $value) ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($label); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </label>
-            <label>
-                Language:
-                <select id="language-selector" name="language">
-                    <?php foreach ($AVAILABLE_LANGUAGES as $value => $label): ?>
-                        <option value="<?php echo htmlspecialchars($value); ?>" <?php echo ($language === $value) ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($label); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </label>
-            <button onclick="saveConfig()">Save Settings</button>
-        </div>
-        
-        <div class="chat-history" id="chat-history">
-            <div class="message assistant-message">
-                <div class="message-header">Assistant</div>
-                <div class="message-content">Hello! I'm your medical assistant. How can I help you today?</div>
+        <main>
+            <section class="config-panel">
+                <header>
+                    <h2>Configuration</h2>
+                </header>
+                <fieldset>
+                    <label>
+                        Model:
+                        <select id="model-selector" name="model">
+                            <?php foreach ($AVAILABLE_MODELS as $value => $label): ?>
+                                <option value="<?php echo htmlspecialchars($value); ?>" <?php echo ($model === $value) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($label); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </label>
+                    <label>
+                        Personality:
+                        <select id="personality-selector" name="personality">
+                            <?php foreach ($AVAILABLE_PERSONALITIES as $value => $label): ?>
+                                <option value="<?php echo htmlspecialchars($value); ?>" <?php echo ($personality === $value) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($label); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </label>
+                    <label>
+                        Language:
+                        <select id="language-selector" name="language">
+                            <?php foreach ($AVAILABLE_LANGUAGES as $value => $label): ?>
+                                <option value="<?php echo htmlspecialchars($value); ?>" <?php echo ($language === $value) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($label); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </label>
+                </fieldset>
+                <button onclick="saveConfig()">Save Settings</button>
+            </section>
+            
+            <section class="chat-history" id="chat-history">
+                <div class="message assistant-message">
+                    <div class="message-header">Assistant</div>
+                    <div class="message-content">Hello! I'm your medical assistant. How can I help you today?</div>
+                </div>
+            </section>
+            
+            <div class="typing-indicator" id="typing-indicator">
+                Assistant is typing...
             </div>
-        </div>
-        
-        <div class="typing-indicator" id="typing-indicator">
-            Assistant is typing...
-        </div>
-        
-        <div class="input-area">
-            <input type="text" id="message-input" placeholder="Type your medical question here..." onkeypress="handleKeyPress(event)">
-            <button id="send-button" onclick="sendMessage()">Send</button>
-        </div>
-    </div>
+            
+            <footer>
+                <div class="input-area">
+                    <input type="text" id="message-input" placeholder="Type your medical question here..." onkeypress="handleKeyPress(event)">
+                    <button id="send-button" onclick="sendMessage()">Send</button>
+                </div>
+            </footer>
+        </main>
+    </article>
 
     <script>
         let chatHistory = [];
