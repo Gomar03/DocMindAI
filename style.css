@@ -537,13 +537,3 @@ article ul {
     padding: 15px;
     border-radius: 5px;
     margin-bottom: 20px;
-}
-
-.config-panel label {
-    display: block;
-    margin-bottom: 10px;
-}
-
-.config-panel input, .config-panel select {
-    margin-left: 10px;
-}
