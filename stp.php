@@ -128,7 +128,7 @@ function getSystemPrompt($prompt_type, $language) {
         case 'problem_idea_evidence':
             return "You are an academic paper analyzer. Your task is to analyze research papers and extract key information using a structured approach.
 
-" . getLanguageInstruction($language) . "
+CRITICAL INSTRUCTION: " . getLanguageInstruction($language) . "
 
 OUTPUT FORMAT (JSON):
 {
@@ -160,7 +160,7 @@ Response: {
         default:
             return "You are an academic paper analyzer. Your task is to analyze research papers using a three-pass approach.
 
-" . getLanguageInstruction($language) . "
+CRITICAL INSTRUCTION: " . getLanguageInstruction($language) . "
 
 OUTPUT FORMAT (JSON):
 {

@@ -138,7 +138,7 @@ if (!array_key_exists($personality, $AVAILABLE_PERSONALITIES)) {
  * System prompt for the AI model
  * Contains instructions for the selected personality and language
  */
-$SYSTEM_PROMPT = getPersonalityInstruction($personality, $language) . " " . getLanguageInstruction($language);
+$SYSTEM_PROMPT = getPersonalityInstruction($personality, $language) . " " . getLanguageInstruction($language) . " CRITICAL: Always respond in the specified language.";
 
 /**
  * Application state variables

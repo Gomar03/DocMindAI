@@ -114,7 +114,7 @@ if (!array_key_exists($LANGUAGE, $AVAILABLE_LANGUAGES)) {
  */
 $SYSTEM_PROMPT = "You are a radiology expert specializing in differential diagnosis. Your task is to analyze radiology reports and provide a ranked list of differential diagnoses with supporting information.
 
-" . getLanguageInstruction($LANGUAGE) . "
+CRITICAL INSTRUCTION: " . getLanguageInstruction($LANGUAGE) . "
 
 OUTPUT FORMAT (JSON):
 {

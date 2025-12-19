@@ -109,7 +109,7 @@ if (!array_key_exists($LANGUAGE, $AVAILABLE_LANGUAGES)) {
  */
 $SYSTEM_PROMPT = "You are a content summarization assistant. Your task is to identify the main content of a web page and create a structured summary of the most important points.
 
-" . getLanguageInstruction($LANGUAGE) . "
+CRITICAL INSTRUCTION: " . getLanguageInstruction($LANGUAGE) . "
 
 OUTPUT FORMAT (JSON):
 {

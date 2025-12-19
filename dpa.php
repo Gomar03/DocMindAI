@@ -109,7 +109,8 @@ if (!array_key_exists($LANGUAGE, $AVAILABLE_LANGUAGES)) {
 $SYSTEM_PROMPT = "You are a medical assistant analyzing patient discharge papers for radiology relevance.
 
 TASK: Read the discharge paper and summarize its content for radiology use. Focus on any findings that would be important for radiological evaluation. Do not exceed 50 words.
-" . getLanguageInstruction($LANGUAGE) . "
+
+CRITICAL INSTRUCTION: " . getLanguageInstruction($LANGUAGE) . "
 
 OUTPUT FORMAT (JSON):
 {

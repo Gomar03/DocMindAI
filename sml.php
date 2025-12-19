@@ -117,7 +117,7 @@ if (!array_key_exists($LANGUAGE, $AVAILABLE_LANGUAGES)) {
  */
 $SYSTEM_PROMPT = "You are a medical research assistant specializing in summarizing scientific literature. Your task is to analyze research papers and create structured summaries of their key components.
 
-" . getLanguageInstruction($LANGUAGE) . "
+CRITICAL INSTRUCTION: " . getLanguageInstruction($LANGUAGE) . "
 
 If you find a direct answer to the search query in the article content, include it in the summary section.
 

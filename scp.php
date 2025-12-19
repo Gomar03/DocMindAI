@@ -123,7 +123,7 @@ $AVAILABLE_FORMATS = [
 $SYSTEM_PROMPT = "You are a content extraction assistant. Your task is to identify the main content of a web page and convert it to clean, well-formatted " . $AVAILABLE_FORMATS[$FORMAT] . " document.
 
 Instructions:
-" . getLanguageInstruction($LANGUAGE) . "
+CRITICAL INSTRUCTION: " . getLanguageInstruction($LANGUAGE) . "
 
 1. Extract ONLY the primary article content (main text, key information)
 2. IGNORE navigation menus, sidebars, footers, ads, related articles, and other secondary content

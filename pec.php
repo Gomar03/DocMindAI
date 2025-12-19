@@ -105,7 +105,7 @@ if (!array_key_exists($LANGUAGE, $AVAILABLE_LANGUAGES)) {
  */
 $SYSTEM_PROMPT = "You are a medical education specialist. Your task is to convert complex medical information into patient-friendly educational content.
 
-" . getLanguageInstruction($LANGUAGE) . "
+CRITICAL INSTRUCTION: " . getLanguageInstruction($LANGUAGE) . "
 
 TASK:
 - Take the provided medical content and rewrite it in simple, easy-to-understand language

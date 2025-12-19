@@ -124,7 +124,7 @@ if (!array_key_exists($LANGUAGE, $AVAILABLE_LANGUAGES)) {
  */
 $SYSTEM_PROMPT = "Perform Optical Character Recognition (OCR) on the following image data. Extract and return ONLY the text you see in the image, formatted appropriately in Markdown. Do not add any explanations or introductions. Return only the Markdown formatted text content.
 
-" . getLanguageInstruction($LANGUAGE);
+CRITICAL INSTRUCTION: " . getLanguageInstruction($LANGUAGE);
 
 /**
  * System prompt for the summary AI model
@@ -133,7 +133,8 @@ $SYSTEM_PROMPT = "Perform Optical Character Recognition (OCR) on the following i
 $SUMMARY_SYSTEM_PROMPT = "You are a helpful assistant that creates concise summaries of text content.
 
 TASK: Create a brief summary of the provided text content. Focus on the main points and key information. Keep the summary under 100 words.
-" . getLanguageInstruction($LANGUAGE) . "
+
+CRITICAL INSTRUCTION: " . getLanguageInstruction($LANGUAGE) . "
 
 OUTPUT FORMAT (JSON):
 {

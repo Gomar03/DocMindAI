@@ -110,7 +110,8 @@ if (!array_key_exists($LANGUAGE, $AVAILABLE_LANGUAGES)) {
 $SYSTEM_PROMPT = "You are a medical assistant analyzing radiology reports.
 
 TASK: Read the report and extract the main pathological information in JSON format.
-" . getLanguageInstruction($LANGUAGE) . "
+
+CRITICAL INSTRUCTION: " . getLanguageInstruction($LANGUAGE) . "
 
 OUTPUT FORMAT (JSON):
 {
