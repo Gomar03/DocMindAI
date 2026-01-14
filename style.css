@@ -248,6 +248,7 @@ article > section > ul li {
 
 .diagnosis-item h4 {
     margin-top: 8px;
+    font-family: 'Roboto', sans-serif;
 }
 
 .diagnosis-item h3 {
@@ -256,6 +257,7 @@ article > section > ul li {
     color: #111827;
     text-transform: none;
     flex: 1;
+    font-family: 'Roboto', sans-serif;
 }
 
 .diagnosis-item .diagnosis-header {
@@ -267,6 +269,7 @@ article > section > ul li {
 .diagnosis-item .probability-score {
     font-weight: 600;
     margin-left: auto;
+    font-family: 'Roboto', sans-serif;
 }
 
 article > footer > div {
