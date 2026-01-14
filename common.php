@@ -673,6 +673,42 @@ function extractJsonFromResponse($content) {
 }
 
 /**
+ * Convert array to YAML format
+ *
+ * @param array $array Array to convert
+ * @return string YAML formatted string
+ */
+function arrayToYaml($array) {
+    $yaml = '';
+    $indent = 0;
+
+    $process = function($data, $indent) use (&$process, &$yaml) {
+        $spaces = str_repeat('  ', $indent);
+
+        if (is_array($data)) {
+            if (array_keys($data) === range(0, count($data) - 1)) {
+                // Sequential array
+                foreach ($data as $value) {
+                    $yaml .= $spaces . "- ";
+                    $process($value, $indent + 1);
+                }
+            } else {
+                // Associative array
+                foreach ($data as $key => $value) {
+                    $yaml .= $spaces . $key . ": ";
+                    $process($value, $indent + 1);
+                }
+            }
+        } else {
+            $yaml .= (is_string($data) ? '"' . $data . '"' : $data) . "\n";
+        }
+    };
+
+    $process($array, $indent);
+    return $yaml;
+}
+
+/**
  * Convert basic markdown to HTML
  * 
  * @param string $markdown Markdown text to convert

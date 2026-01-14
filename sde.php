@@ -263,6 +263,15 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
                         Enter the text data you want to extract structured data from.
                     </small>
 
+                    <label for="output_format">Output format:</label>
+                    <select id="output_format" name="output_format">
+                        <option value="json" <?php echo ($OUTPUT_FORMAT === 'json') ? 'selected' : ''; ?>>JSON</option>
+                        <option value="yaml" <?php echo ($OUTPUT_FORMAT === 'yaml') ? 'selected' : ''; ?>>YAML</option>
+                    </select>
+                    <small>
+                        Select the output format for the extracted data.
+                    </small>
+
                     <label for="model">AI model:</label>
                     <select id="model" name="model">
                         <?php foreach ($AVAILABLE_MODELS as $value => $label): ?>
@@ -285,15 +294,6 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
                     </select>
                     <small>
                         Select the language for the extracted data output.
-                    </small>
-
-                    <label for="output_format">Output format:</label>
-                    <select id="output_format" name="output_format">
-                        <option value="json" <?php echo ($OUTPUT_FORMAT === 'json') ? 'selected' : ''; ?>>JSON</option>
-                        <option value="yaml" <?php echo ($OUTPUT_FORMAT === 'yaml') ? 'selected' : ''; ?>>YAML</option>
-                    </select>
-                    <small>
-                        Select the output format for the extracted data.
                     </small>
                 </fieldset>
                 
