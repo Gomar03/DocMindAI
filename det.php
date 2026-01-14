@@ -1,6 +1,6 @@
 <?php
 /**
- * Data Extractor Tool
+ * Structured Data Extractor (SDE)
  * 
  * A PHP web application that uses AI to extract structured data from unstructured text.
  * 
@@ -20,10 +20,10 @@
  * 
  * Usage:
  * - Web interface: Access via browser
- * - API endpoint: POST /det.php with data
+ * - API endpoint: POST /sde.php with data
  * 
  * API Usage:
- * POST /det.php
+ * POST /sde.php
  * Parameters:
  * - data (required): Text data to extract from
  * - model (optional): AI model to use (default: qwen2.5:1.5b)
@@ -79,8 +79,8 @@ if (!isset($DEFAULT_TEXT_MODEL)) {
 /**
  * Get selected model and language from POST/GET data, cookies, or use defaults
  */
-$MODEL = isset($_POST['model']) ? $_POST['model'] : (isset($_GET['model']) ? $_GET['model'] : (isset($_COOKIE['det-model']) ? $_COOKIE['det-model'] : $DEFAULT_TEXT_MODEL));
-$LANGUAGE = isset($_POST['language']) ? $_POST['language'] : (isset($_GET['language']) ? $_GET['language'] : (isset($_COOKIE['det-language']) ? $_COOKIE['det-language'] : 'en'));
+$MODEL = isset($_POST['model']) ? $_POST['model'] : (isset($_GET['model']) ? $_GET['model'] : (isset($_COOKIE['sde-model']) ? $_COOKIE['sde-model'] : $DEFAULT_TEXT_MODEL));
+$LANGUAGE = isset($_POST['language']) ? $_POST['language'] : (isset($_GET['language']) ? $_GET['language'] : (isset($_COOKIE['sde-language']) ? $_COOKIE['sde-language'] : 'en'));
 
 /**
  * Validate model selection
@@ -174,8 +174,8 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
         
         // Set cookies with the selected model and language only for web requests
         if (!$is_api_request) {
-            setcookie('det-model', $MODEL, time() + (30 * 24 * 60 * 60), '/'); // 30 days
-            setcookie('det-language', $LANGUAGE, time() + (30 * 24 * 60 * 60), '/'); // 30 days
+            setcookie('sde-model', $MODEL, time() + (30 * 24 * 60 * 60), '/'); // 30 days
+            setcookie('sde-language', $LANGUAGE, time() + (30 * 24 * 60 * 60), '/'); // 30 days
         }
         
         // Return JSON if it's an API request
@@ -197,14 +197,14 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Extractor Tool</title>
+    <title>Structured Data Extractor</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📊%3C/text%3E%3C/svg%3E">
 </head>
 <body>
     <div class="container">
         <hgroup>
-            <h1>📊 Data Extractor Tool</h1>
+            <h1>📊 Structured Data Extractor (SDE)</h1>
             <p>AI-powered extraction of structured data from unstructured text</p>
         </hgroup>
 
