@@ -363,6 +363,47 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
                 }
             });
         });
+
+        // YAML syntax highlighting function
+        function yamlSyntaxHighlight(yaml) {
+            // Escape HTML entities
+            yaml = yaml.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+            // Highlight keys (lines ending with ":")
+            yaml = yaml.replace(/^(\s*[a-zA-Z0-9_-]+:)(.*)$/gm, function(match, key, rest) {
+                return '<span class="yaml-key">' + key + '</span>' + rest;
+            });
+
+            // Highlight string values (quoted strings)
+            yaml = yaml.replace(/"([^"]*)"/g, '<span class="yaml-string">"$1"</span>');
+            yaml = yaml.replace(/'([^']*)'/g, '<span class="yaml-string">\'$1\'</span>');
+
+            // Highlight numbers
+            yaml = yaml.replace(/\b(\d+(\.\d+)?)\b/g, '<span class="yaml-number">$1</span>');
+
+            // Highlight booleans
+            yaml = yaml.replace(/\b(true|false)\b/gi, '<span class="yaml-boolean">$1</span>');
+
+            // Highlight null
+            yaml = yaml.replace(/\b(null|~)\b/gi, '<span class="yaml-null">$1</span>');
+
+            // Highlight comments
+            yaml = yaml.replace(/#.*$/gm, '<span class="yaml-comment">$&</span>');
+
+            return yaml;
+        }
+
+        // Apply YAML syntax highlighting
+        document.addEventListener('DOMContentLoaded', function() {
+            const yamlElements = document.querySelectorAll('pre');
+            yamlElements.forEach(function(element) {
+                const text = element.textContent;
+                // Simple heuristic to detect YAML: contains "key: value" pattern
+                if (text.includes(':') && !text.trim().startsWith('{') && !text.trim().startsWith('[')) {
+                    element.innerHTML = yamlSyntaxHighlight(text);
+                }
+            });
+        });
     </script>
 </body>
 </html>
