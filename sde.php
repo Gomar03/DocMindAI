@@ -235,7 +235,10 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
                         if (is_array($result)) {
                             if ($OUTPUT_FORMAT === 'yaml') {
                                 // Convert array to YAML and display
-                                echo '<pre>' . htmlspecialchars(arrayToYaml($result)) . '</pre>';
+                                $yaml_output = arrayToYaml($result);
+                                // Remove markdown fences if present
+                                $yaml_output = preg_replace('/^```(?:yaml)?\s*|\s*```$/s', '', $yaml_output);
+                                echo '<pre>' . htmlspecialchars($yaml_output) . '</pre>';
                             } else {
                                 // Display as formatted JSON
                                 echo '<pre>' . htmlspecialchars(json_encode($result, JSON_PRETTY_PRINT)) . '</pre>';
