@@ -238,6 +238,8 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
                                 $yaml_output = arrayToYaml($result);
                                 // Remove markdown fences if present
                                 $yaml_output = preg_replace('/^```(?:yaml)?\s*|\s*```$/s', '', $yaml_output);
+                                // Remove any remaining markdown fences
+                                $yaml_output = preg_replace('/^```yaml\s*|\s*```$/s', '', $yaml_output);
                                 echo '<pre>' . htmlspecialchars($yaml_output) . '</pre>';
                             } else {
                                 // Display as formatted JSON
