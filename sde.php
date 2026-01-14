@@ -237,9 +237,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
                                 // Convert array to YAML and display
                                 $yaml_output = arrayToYaml($result);
                                 // Remove markdown fences if present
-                                $yaml_output = preg_replace('/^```(?:yaml)?\s*|\s*```$/s', '', $yaml_output);
-                                // Remove any remaining markdown fences
-                                $yaml_output = preg_replace('/^```yaml\s*|\s*```$/s', '', $yaml_output);
+                                $yaml_output = removeMarkdownFence($yaml_output);
                                 echo '<pre>' . htmlspecialchars($yaml_output) . '</pre>';
                             } else {
                                 // Display as formatted JSON
@@ -247,7 +245,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
                             }
                         } else {
                             // Display as plain text
-                            echo '<pre>' . htmlspecialchars($result) . '</pre>';
+                            echo '<pre>' . htmlspecialchars(removeMarkdownFence($result)) . '</pre>';
                         }
                         ?>
                     </section>
@@ -369,26 +367,26 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
             // Escape HTML entities
             yaml = yaml.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+            // Highlight string values (quoted strings)
+            yaml = yaml.replace(/"([^"]*)"/g, '<span class="string">"$1"</span>');
+            //yaml = yaml.replace(/'([^']*)'/g, '<span class="string">\'$1\'</span>');
+
             // Highlight keys (lines ending with ":")
             yaml = yaml.replace(/^(\s*[a-zA-Z0-9_-]+:)(.*)$/gm, function(match, key, rest) {
-                return '<span class="yaml-key">' + key + '</span>' + rest;
+                return '<b class="key">' + key + '</b>' + rest;
             });
 
-            // Highlight string values (quoted strings)
-            yaml = yaml.replace(/"([^"]*)"/g, '<span class="yaml-string">"$1"</span>');
-            yaml = yaml.replace(/'([^']*)'/g, '<span class="yaml-string">\'$1\'</span>');
-
             // Highlight numbers
-            yaml = yaml.replace(/\b(\d+(\.\d+)?)\b/g, '<span class="yaml-number">$1</span>');
+            yaml = yaml.replace(/\b(\d+(\.\d+)?)\b/g, '<span class="number">$1</span>');
 
             // Highlight booleans
-            yaml = yaml.replace(/\b(true|false)\b/gi, '<span class="yaml-boolean">$1</span>');
+            yaml = yaml.replace(/\b(true|false)\b/gi, '<span class="boolean">$1</span>');
 
             // Highlight null
-            yaml = yaml.replace(/\b(null|~)\b/gi, '<span class="yaml-null">$1</span>');
+            yaml = yaml.replace(/\b(null|~)\b/gi, '<span class="null">$1</span>');
 
             // Highlight comments
-            yaml = yaml.replace(/#.*$/gm, '<span class="yaml-comment">$&</span>');
+            yaml = yaml.replace(/#.*$/gm, '<i class="comment">$&</i>');
 
             return yaml;
         }

@@ -313,7 +313,7 @@ function scrapeUrl($url) {
                         <h2>Markdown / DokuWiki Content</h2>
                     </header>
                     
-                    <textarea class="markdown-result" readonly><?php echo htmlspecialchars($result); ?></textarea>
+                    <pre class="markdown"><?php echo htmlspecialchars($result); ?></pre>
                 </article>
             <?php endif; ?>
 

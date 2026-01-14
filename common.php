@@ -708,6 +708,17 @@ function arrayToYaml($array) {
     return $yaml;
 }
 
+function removeMarkdownFence(string $text): string
+{
+    // Remove opening fence (``` or ```lang)
+    $text = preg_replace('/^```[a-zA-Z0-9_-]*\s*/', '', $text);
+
+    // Remove closing fence
+    $text = preg_replace('/\s*```$/', '', $text);
+
+    return trim($text);
+}
+
 /**
  * Convert basic markdown to HTML
  * 
