@@ -6,6 +6,14 @@
     font-display: swap;
 }
 
+@font-face {
+    font-family: 'Roboto Mono';
+    src: url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400&display=swap');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -65,7 +73,7 @@ textarea {
     border: 2px solid #e5e7eb;
     border-radius: 8px;
     font-size: 14px;
-    font-family: 'Envy Code R', 'Courier New', Courier, monospace;
+    font-family: 'Roboto Mono', 'Envy Code R', 'Courier New', Courier, monospace;
     resize: vertical;
     transition: border-color 0.3s;
 }
@@ -294,7 +302,7 @@ small {
     border-radius: 12px;
     margin-bottom: 20px;
     border: 2px solid #e5e7eb;
-    font-family: 'Envy Code R', 'Courier New', Courier, monospace;
+    font-family: 'Roboto Mono', 'Envy Code R', 'Courier New', Courier, monospace;
     width: 100%;
     min-height: 200px;
     max-height: 400px;
@@ -336,7 +344,7 @@ article ul {
 pre {
     color: #212529;
     overflow-x: auto;
-    font-family: 'Envy Code R', 'Courier New', Courier, monospace;
+    font-family: 'Roboto Mono', 'Envy Code R', 'Courier New', Courier, monospace;
     font-size: 14px;
     line-height: 1.5;
     white-space: pre-wrap;
