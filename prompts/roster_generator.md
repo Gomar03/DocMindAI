@@ -53,6 +53,7 @@ You are a medical staff roster generator. Create a conflict-free day-shift roste
 **Optimization Goals:**
 - Balance total working days evenly
 - Avoid repeating same person-station assignments within a week
+- Try to not repeat a person on the same workstation in the same week
 
 ## OUTPUT FORMAT
 
