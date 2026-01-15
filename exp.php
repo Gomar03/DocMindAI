@@ -77,40 +77,10 @@ if (!isset($DEFAULT_TEXT_MODEL)) {
 }
 
 /**
- * Predefined prompts for different use cases
- */
-$PREDEFINED_PROMPTS = [
-    'general_medical' => [
-        'label' => 'General Medical Information',
-        'prompt' => 'You are a medical assistant. Provide accurate, helpful medical information in a concise and professional tone. Avoid giving specific medical advice. Always recommend consulting with healthcare professionals for personal medical concerns.'
-    ],
-    'diagnosis_helper' => [
-        'label' => 'Diagnosis Helper',
-        'prompt' => 'You are a medical diagnosis assistant. Given the following symptoms and patient history, provide possible diagnoses with their likelihood percentages. Include differential diagnoses and recommend appropriate next steps for evaluation.'
-    ],
-    'treatment_options' => [
-        'label' => 'Treatment Options',
-        'prompt' => 'You are a treatment options advisor. For the given medical condition, provide evidence-based treatment options including medications, therapies, and lifestyle changes. Include potential side effects and success rates where available.'
-    ],
-    'medical_research' => [
-        'label' => 'Medical Research Summary',
-        'prompt' => 'You are a medical researcher. Summarize the latest research on the given medical topic. Include key findings, study methodologies, and clinical significance. Provide references where possible.'
-    ],
-    'patient_education' => [
-        'label' => 'Patient Education',
-        'prompt' => 'You are a patient educator. Explain the given medical condition in simple, understandable terms. Include causes, symptoms, treatment options, and prevention strategies. Use analogies and avoid medical jargon.'
-    ],
-    'medical_coding' => [
-        'label' => 'Medical Coding Assistant',
-        'prompt' => 'You are a medical coding specialist. Given the medical description, provide appropriate ICD-10, CPT, and HCPCS codes. Include brief explanations for each code and any relevant coding guidelines.'
-    ]
-];
-
-/**
- * Load additional prompts from files in the prompts directory
+ * Load prompts from files in the prompts directory
  */
 function loadPromptsFromDirectory() {
-    $additional_prompts = [];
+    $prompts = [];
 
     // Check if prompts directory exists
     if (is_dir('prompts')) {
@@ -131,7 +101,7 @@ function loadPromptsFromDirectory() {
                 // Read file content as prompt
                 $content = file_get_contents($file_path);
                 if ($content !== false) {
-                    $additional_prompts[$key] = [
+                    $prompts[$key] = [
                         'label' => $label,
                         'prompt' => trim($content)
                     ];
@@ -140,21 +110,21 @@ function loadPromptsFromDirectory() {
         }
     }
 
-    return $additional_prompts;
+    return $prompts;
 }
 
-// Load additional prompts from files
-$ADDITIONAL_PROMPTS = loadPromptsFromDirectory();
-
-// Merge additional prompts with predefined ones
-$PREDEFINED_PROMPTS = array_merge($PREDEFINED_PROMPTS, $ADDITIONAL_PROMPTS);
+// Load all prompts from files
+$PREDEFINED_PROMPTS = loadPromptsFromDirectory();
 
 /**
  * Get selected model, language, and prompt from POST/GET data, cookies, or use defaults
  */
 $MODEL = isset($_POST['model']) ? $_POST['model'] : (isset($_GET['model']) ? $_GET['model'] : (isset($_COOKIE['exp-model']) ? $_COOKIE['exp-model'] : $DEFAULT_TEXT_MODEL));
 $LANGUAGE = isset($_POST['language']) ? $_POST['language'] : (isset($_GET['language']) ? $_GET['language'] : (isset($_COOKIE['exp-language']) ? $_COOKIE['exp-language'] : 'en'));
-$PROMPT_TYPE = isset($_POST['prompt_type']) ? $_POST['prompt_type'] : (isset($_GET['prompt_type']) ? $_GET['prompt_type'] : (isset($_COOKIE['exp-prompt-type']) ? $_COOKIE['exp-prompt-type'] : 'general_medical'));
+
+// Set default prompt type - use first available prompt or empty string
+$default_prompt_type = !empty($PREDEFINED_PROMPTS) ? array_keys($PREDEFINED_PROMPTS)[0] : '';
+$PROMPT_TYPE = isset($_POST['prompt_type']) ? $_POST['prompt_type'] : (isset($_GET['prompt_type']) ? $_GET['prompt_type'] : (isset($_COOKIE['exp-prompt-type']) ? $_COOKIE['exp-prompt-type'] : $default_prompt_type));
 
 /**
  * Validate model selection
@@ -287,19 +257,27 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['prompt'])) ||
                 </article>
             <?php endif; ?>
 
+            <?php if (empty($PREDEFINED_PROMPTS)): ?>
+                <section role="alert" class="error">
+                    <strong>ℹ️ Information:</strong> No prompt files found in the 'prompts' directory. Please create .txt, .md, or .xml files in the prompts directory to use predefined prompts.
+                </section>
+            <?php endif; ?>
+
             <form method="POST" action="" id="experimentForm">
                 <fieldset>
-                    <label for="prompt_type">Predefined Prompt:</label>
-                    <select id="prompt_type" name="prompt_type" onchange="updatePrompt()">
-                        <?php foreach ($PREDEFINED_PROMPTS as $key => $prompt_data): ?>
-                            <option value="<?php echo htmlspecialchars($key); ?>" <?php echo ($PROMPT_TYPE === $key) ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($prompt_data['label']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                    <small>
-                        Select a predefined prompt type or choose "Custom" to enter your own.
-                    </small>
+                    <?php if (!empty($PREDEFINED_PROMPTS)): ?>
+                        <label for="prompt_type">Predefined Prompt:</label>
+                        <select id="prompt_type" name="prompt_type" onchange="updatePrompt()">
+                            <?php foreach ($PREDEFINED_PROMPTS as $key => $prompt_data): ?>
+                                <option value="<?php echo htmlspecialchars($key); ?>" <?php echo ($PROMPT_TYPE === $key) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($prompt_data['label']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <small>
+                            Select a predefined prompt type or choose "Custom" to enter your own.
+                        </small>
+                    <?php endif; ?>
 
                     <label for="prompt">Prompt Text:</label>
                     <textarea
