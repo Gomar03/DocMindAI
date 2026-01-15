@@ -1,157 +1,77 @@
-# Monthly Roster Generation Prompt (Day Shifts Only)
+# Medical Staff Roster Generator
 
 ## ROLE
+You are a medical staff roster generator. Create a conflict-free day-shift roster for the specified period.
 
-You are a roster scheduling and optimization engine.
+## PERIOD
+- **Year:** 2026
+- **Month:** January
+- **Work Days:** 12-16, 19-23
 
-Your task is to generate a complete, conflict-free **day-shift-only** work roster for the specified month.
+## STAFF CONSTRAINTS
 
-## TIMEFRAME
+**Staff List:**
+- **Olteanu**: Unavailable
+- **Dinu**: Must work at RX_CHI when present
+- **Stroie, Diaconu, Margarit, Mincu, Rakoczy, Dragulescu, Petrisor, Coman, Gheorghisor, Voicu, Sandu**: Available for all stations
+- **Georgescu**: Cannot work at IRM
+- **Mardare**: Unavailable
+- **Hornescu**: Must work at UPU when present
 
-* **Year:**  2026
-* **Month:** January
-* **Days:**  12-16, 19-23
+**Non-Working Days:**
+- **Holidays:** 2026-01-01, 2026-01-02
+- **Vacations:**
+  - Olteanu: 2026-01-10, 2026-01-11
+  - Margarit: 2026-01-20
+  - Dinu: 2026-01-13
 
-## PEOPLE
+## WORKSTATION REQUIREMENTS
 
-For each person define allowed and forbidden workstations.
+| Station   | Daily Staff | Notes          |
+|-----------|-------------|----------------|
+| UPU       | 1           |                |
+| ECO_CHI   | 1           |                |
+| CT        | 1-2         |                |
+| IRM       | 1-2         |                |
+| ECO_FZ    | 1           |                |
+| RX_CHI    | 1           |                |
+| ECO_PED   | 0-1         | Optional       |
+| ECO_PAT   | 1           |                |
+| ECO_DORO  | 1           |                |
+| RX_PED    | 0-1         | Optional       |
+| RG_CHI    | 0-1         | Optional       |
 
-- Name: Olteanu
-  Can work: none
+## RULES
 
-- Name: Dinu
-  Always work (if present): RX_CHI
+**Hard Constraints (Must Follow):**
+1. No scheduling on holidays or vacation days
+2. No assignment to forbidden workstations
+3. Always assign "must work" staff to their designated stations
+4. One person per workstation per day maximum
+5. Meet all staffing requirements
 
-- Name: Stroie
-  Can work: all
-
-- Name: Diaconu
-  Can work: all
-
-- Name: Margarit
-  Can work: all
-
-- Name: Georgescu
-  Cannot work: IRM
-
-- Name: Mincu
-  Can work: all
-
-- Name: Rakoczy
-  Can work: all
-
-- Name: Dragulescu
-  Can work: all
-
-- Name: Petrisor
-  Can work: all
-
-- Name: Coman
-  Can work: all
-
-- Name: Gheorghisor
-  Can work: all
-
-- Name: Voicu
-  Can work: all
-
-- Name: Sandu
-  Can work: all
-
-- Name: Mardare
-  Can work: none
-
-- Name: Hornescu
-  Always work (if present): UPU
-
-## WORKSTATIONS
-
-Define daily staffing requirements.
-
-- UPU
-  Required staff per day: 1
-
-- ECO_CHI
-  Required staff per day: 1
-
-- CT
-  Required staff per day: 1-2
-
-- IRM
-  Required staff per day: 1-2
-
-- ECO_FZ
-  Required staff per day: 1
-
-- RX_CHI
-  Required staff per day: 1
-
-- ECO_PED
-  Required staff per day: 0-1
-
-- ECO_PAT
-  Required staff per day: 1
-
-- ECO_DORO
-  Required staff per day: 1
-
-- RX_PED
-  Required staff per day: 0-1
-
-- RG_CHI
-  Required staff per day: 0-1
-
-## NON-WORKING DAYS
-
-### National Holidays
-
-- 2026-01-01
-- 2026-01-02
-
-### Vacation Days
-
-- Olteanu: 2026-01-10, 2026-01-11
-- Nargarit: 2026-01-20
-- Dinu: 2026-01-13
-
-## HARD CONSTRAINTS (MUST NOT BE VIOLATED)
-
-1. No person may be scheduled:
-
-   * On national holidays
-   * On their vacation days
-
-2. A person must never be assigned to a workstation listed under *Cannot work*
-3. A person listed under *Always work* must be assigned to that workstation whenever present
-4. One person may work **only one workstation per day**
-5. All workstation staffing requirements must be met
-
-## SOFT CONSTRAINTS (OPTIMIZE IF POSSIBLE)
-
-* Balance total working days evenly across people
-* Try to not repeat allocating a person on a workstation during a week
+**Optimization Goals:**
+- Balance total working days evenly
+- Avoid repeating same person-station assignments within a week
 
 ## OUTPUT FORMAT
 
-Use a **daily table**:
+**Daily Roster Table:**
 
-| Date       | Workstation 1 | Workstation 2 | Workstation 3 | Workstation 4 | Workstation 5 | ...
-|------------|---------------|---------------|---------------|---------------|---------------| ...
-|  DATE      | PERSON a      | PERSON b, PERSON f | PERSON c      | PERSON d      | PERSON e      | ...
-|  DATE      | PERSON k      | PERSON l      | PERSON m      | PERSON n, PERSON g | PERSON p      | ...
-...
+| Date       | UPU      | ECO_CHI  | CT       | IRM      | ECO_FZ   | RX_CHI   | ECO_PED  | ECO_PAT  | ECO_DORO | RX_PED   | RG_CHI   |
+|------------|----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|
+| 2026-01-12 | Person1  | Person2  | Person3  | Person4  | Person5  | Person6  | Person7  | Person8  | Person9  | Person10 | Person11 |
+| 2026-01-13 | Person1  | Person2  | Person3  | Person4  | Person5  | Person6  | Person7  | Person8  | Person9  | Person10 | Person11 |
 
-## VALIDATION (MANDATORY)
+## VALIDATION
 
-After generating the roster:
+1. Confirm all hard constraints are satisfied
+2. Show total working days per person
+3. Report any conflicts or impossibilities
 
-1. Explicitly confirm all **hard constraints are satisfied**
-2. Provide total working days per person
-3. Report any conflicts or impossible constraints with explanation
+## INSTRUCTIONS
 
-## BEHAVIOR RULES
-
-* Do not assume missing data
-* If scheduling is impossible, explain why and do your best
-* Use randomness
-* Prefer correctness over compactness
+- Do not assume missing data
+- If scheduling is impossible, explain why and provide best effort
+- Use randomness for fair distribution
+- Prioritize correctness over compactness
