@@ -107,6 +107,49 @@ $PREDEFINED_PROMPTS = [
 ];
 
 /**
+ * Load additional prompts from files in the prompts directory
+ */
+function loadPromptsFromDirectory() {
+    $additional_prompts = [];
+
+    // Check if prompts directory exists
+    if (is_dir('prompts')) {
+        // Get all files in the prompts directory
+        $files = scandir('prompts');
+
+        foreach ($files as $file) {
+            // Check for .txt, .md, or .xml extensions
+            if (preg_match('/\.(txt|md|xml)$/i', $file)) {
+                $file_path = 'prompts/' . $file;
+
+                // Use filename (without extension) as the key
+                $key = pathinfo($file, PATHINFO_FILENAME);
+
+                // Use filename as label (clean up for display)
+                $label = ucwords(str_replace(['_', '-'], ' ', $key));
+
+                // Read file content as prompt
+                $content = file_get_contents($file_path);
+                if ($content !== false) {
+                    $additional_prompts[$key] = [
+                        'label' => $label,
+                        'prompt' => trim($content)
+                    ];
+                }
+            }
+        }
+    }
+
+    return $additional_prompts;
+}
+
+// Load additional prompts from files
+$ADDITIONAL_PROMPTS = loadPromptsFromDirectory();
+
+// Merge additional prompts with predefined ones
+$PREDEFINED_PROMPTS = array_merge($PREDEFINED_PROMPTS, $ADDITIONAL_PROMPTS);
+
+/**
  * Get selected model, language, and prompt from POST/GET data, cookies, or use defaults
  */
 $MODEL = isset($_POST['model']) ? $_POST['model'] : (isset($_GET['model']) ? $_GET['model'] : (isset($_COOKIE['exp-model']) ? $_COOKIE['exp-model'] : $DEFAULT_TEXT_MODEL));
