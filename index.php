@@ -95,6 +95,12 @@ include 'common.php';
                     <p>AI-powered extraction of structured data from unstructured text.</p>
                 </a>
 
+                <a href="soap.php" class="tool-card">
+                    <div class="tool-icon">📋</div>
+                    <h3>SOAP Note Generator</h3>
+                    <p>Convert medical transcripts into structured SOAP notes using AI.</p>
+                </a>
+
                 <a href="chat.php" class="tool-card">
                     <div class="tool-icon">💬</div>
                     <h3>Medical Chat Assistant</h3>
