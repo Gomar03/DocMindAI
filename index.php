@@ -25,15 +25,10 @@ include 'common.php';
     <div class="container">
         <hgroup>
             <h1>📄 AI Document Processing Suite</h1>
-            <p>AI-powered document processing and analysis tools</p>
+            <p>A collection of specialized tools designed to process, analyze, and extract key information from various documents using artificial intelligence.</p>
         </hgroup>
 
         <main>
-            <section class="welcome-section">
-                <h2>Welcome to the AI Document Processing Suite</h2>
-                <p>A collection of specialized tools designed to process, analyze, and extract key information from various documents using artificial intelligence.</p>
-            </section>
-            
             <section class="tool-section">
                 <h2>🏥 Medical Document Processing</h2>
                 <p>Specialized tools for healthcare professionals to process and analyze medical documents.</p>
