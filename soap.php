@@ -342,22 +342,54 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['content']) || (iss
                     if (json_last_error() === JSON_ERROR_NONE && isset($json_result['subjective']) && isset($json_result['objective']) && isset($json_result['assessment']) && isset($json_result['plan'])) {
                         echo '<section>';
                         echo '<h3>🩺 Subjective</h3>';
-                        echo '<p>' . nl2br(htmlspecialchars($json_result['subjective'])) . '</p>';
+                        echo '<ul>';
+                        if (is_array($json_result['subjective'])) {
+                            foreach ($json_result['subjective'] as $item) {
+                                echo '<li>' . htmlspecialchars($item) . '</li>';
+                            }
+                        } else {
+                            echo '<li>' . htmlspecialchars($json_result['subjective']) . '</li>';
+                        }
+                        echo '</ul>';
                         echo '</section>';
 
                         echo '<section>';
                         echo '<h3>🔬 Objective</h3>';
-                        echo '<p>' . nl2br(htmlspecialchars($json_result['objective'])) . '</p>';
+                        echo '<ul>';
+                        if (is_array($json_result['objective'])) {
+                            foreach ($json_result['objective'] as $item) {
+                                echo '<li>' . htmlspecialchars($item) . '</li>';
+                            }
+                        } else {
+                            echo '<li>' . htmlspecialchars($json_result['objective']) . '</li>';
+                        }
+                        echo '</ul>';
                         echo '</section>';
 
                         echo '<section>';
                         echo '<h3>📊 Assessment</h3>';
-                        echo '<p>' . nl2br(htmlspecialchars($json_result['assessment'])) . '</p>';
+                        echo '<ul>';
+                        if (is_array($json_result['assessment'])) {
+                            foreach ($json_result['assessment'] as $item) {
+                                echo '<li>' . htmlspecialchars($item) . '</li>';
+                            }
+                        } else {
+                            echo '<li>' . htmlspecialchars($json_result['assessment']) . '</li>';
+                        }
+                        echo '</ul>';
                         echo '</section>';
 
                         echo '<section>';
                         echo '<h3>💡 Plan</h3>';
-                        echo '<p>' . nl2br(htmlspecialchars($json_result['plan'])) . '</p>';
+                        echo '<ul>';
+                        if (is_array($json_result['plan'])) {
+                            foreach ($json_result['plan'] as $item) {
+                                echo '<li>' . htmlspecialchars($item) . '</li>';
+                            }
+                        } else {
+                            echo '<li>' . htmlspecialchars($json_result['plan']) . '</li>';
+                        }
+                        echo '</ul>';
                         echo '</section>';
                     } else {
                         // Display as plain text/JSON
