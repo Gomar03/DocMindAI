@@ -259,6 +259,10 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
                                 // Convert array to YAML and display
                                 $response_output = yaml_encode($result);
                                 $highlight_class = 'highlight-yaml';
+                            } elseif ($OUTPUT_FORMAT === 'xml') {
+                                // Convert array to XML and display
+                                $response_output = arrayToXml($result);
+                                $highlight_class = 'highlight-xml';
                             } elseif ($OUTPUT_FORMAT === 'markdown') {
                                 // Convert array to Markdown and display
                                 $response_output = markdownToHtml($result);
@@ -299,6 +303,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
                     <select id="output_format" name="output_format">
                         <option value="json" <?php echo ($OUTPUT_FORMAT === 'json') ? 'selected' : ''; ?>>JSON</option>
                         <option value="yaml" <?php echo ($OUTPUT_FORMAT === 'yaml') ? 'selected' : ''; ?>>YAML</option>
+                        <option value="xml" <?php echo ($OUTPUT_FORMAT === 'xml') ? 'selected' : ''; ?>>XML</option>
                         <option value="markdown" <?php echo ($OUTPUT_FORMAT === 'markdown') ? 'selected' : ''; ?>>Markdown</option>
                     </select>
                     <small>
