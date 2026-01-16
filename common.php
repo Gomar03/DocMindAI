@@ -781,8 +781,8 @@ function checkConfigStatus() {
     if (file_exists('config.php')) {
         return '<div class="config-status success">✅ Configuration file found. System is ready to use.</div>';
     } else {
-        $message = '<div class="config-status warning">';
-        $message .= '⚠️ Configuration file not found. Please create config.php with your settings.';
+        $message = '<div class="error">';
+        $message .= '<strong>⚠️ Configuration file not found.</strong> Please create config.php with your settings.';
         $message .= '<div class="config-instructions">';
         $message .= '<p>Copy config.php.example to config.php and edit it with your API settings:</p>';
         $message .= '<pre>cp config.php.example config.php</pre>';
