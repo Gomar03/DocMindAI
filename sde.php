@@ -373,6 +373,12 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['data']) || (isset(
                         Enter the text data you want to extract structured data from.
                     </small>
 
+                    <label for="file">Upload file (optional):</label>
+                    <input type="file" id="file" name="file" accept=".txt,.pdf,.doc,.docx,.odt,.md,.json,.csv,.xml,.png,.jpg,.jpeg,.gif,.webp">
+                    <small>
+                        Upload a file to extract data from (text documents or images). Max 10MB.
+                    </small>
+
                     <label for="output_format">Output format:</label>
                     <select id="output_format" name="output_format">
                         <option value="json" <?php echo ($OUTPUT_FORMAT === 'json') ? 'selected' : ''; ?>>JSON</option>
