@@ -319,9 +319,6 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
                     <?php endif; ?>
                 </section>
             <?php endif; ?>
-            <section>
-                <?php echo var_dump($result); ?>
-            </section>
 
             <?php if ($result): ?>
                 <article>

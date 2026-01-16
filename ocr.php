@@ -361,7 +361,12 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_FILES['image']) || isset(
         <main>
             <?php if ($error): ?>
                 <section role="alert" class="error">
-                    <strong>⚠️ Error:</strong> <?php echo htmlspecialchars($error); ?>
+                    <strong>⚠️ Error:</strong>
+                    <?php if (is_array($error)): ?>
+                        <pre><?php echo json_encode($error, JSON_PRETTY_PRINT); ?></pre>
+                    <?php else: ?>
+                        <?php echo htmlspecialchars($error); ?>
+                    <?php endif; ?>
                 </section>
             <?php endif; ?>
             
