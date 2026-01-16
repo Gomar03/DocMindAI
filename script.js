@@ -93,9 +93,37 @@ function markdownSyntaxHighlight(markdown) {
     return markdown;
 }
 
+// XML syntax highlighting function
+function xmlSyntaxHighlight(xml) {
+    // Escape HTML entities first
+    xml = xml.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    // Highlight XML tags
+    xml = xml.replace(/&lt;(\/?)([a-zA-Z0-9_-]+)([^&]*)&gt;/g, function(match, slash, tag, attrs) {
+        return '&lt;' + slash + '<span class="xml-tag">' + tag + '</span>' + attrs + '&gt;';
+    });
+
+    // Highlight XML attributes
+    xml = xml.replace(/([a-zA-Z0-9_-]+)=/g, '<span class="xml-attribute">$1</span>=');
+
+    // Highlight XML attribute values
+    xml = xml.replace(/="([^"]*)"/g, '=<span class="xml-string">"$1"</span>');
+
+    // Highlight XML comments
+    xml = xml.replace(/&lt;!--.*?--&gt;/g, '<span class="xml-comment">$&</span>');
+
+    // Highlight XML processing instructions
+    xml = xml.replace(/&lt;\?.*?\?&gt;/g, '<span class="xml-processing">$&</span>');
+
+    // Highlight XML CDATA sections
+    xml = xml.replace(/&lt;!\[CDATA\[.*?\]\]&gt;/g, '<span class="xml-cdata">$&</span>');
+
+    return xml;
+}
+
 /**
  * Apply syntax highlighting to all pre elements on the page
- * Handles JSON, YAML, and Markdown content
+ * Handles JSON, YAML, Markdown, and XML content
  */
 function applySyntaxHighlighting() {
     const preElements = document.querySelectorAll('pre');
@@ -109,9 +137,11 @@ function applySyntaxHighlighting() {
                 element.innerHTML = yamlSyntaxHighlight(text);
             } else if (element.classList.contains('highlight-markdown') || element.classList.contains('highlight-md')) {
                 element.innerHTML = markdownSyntaxHighlight(text);
+            } else if (element.classList.contains('highlight-xml')) {
+                element.innerHTML = xmlSyntaxHighlight(text);
             }
         } catch (e) {
-            // Not valid JSON/YAML/Markdown, leave as is
+            // Not valid JSON/YAML/Markdown/XML, leave as is
         }
     });
 }
