@@ -361,7 +361,6 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
                                     $fence_info = extractCodeFenceInfo($text, 'json');
                                     $highlight_class = !empty($fence_info['type']) ? 'highlight-' . $fence_info['type'] : '';
                                     $text = $fence_info['text'];
-                                    $highlight_function = $fence_info['function'];
                                 ?>
                                 <pre class="<?php echo $highlight_class; ?>"><?php echo htmlspecialchars($text); ?></pre>
                             <?php endif; ?>
