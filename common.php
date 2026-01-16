@@ -992,7 +992,8 @@ function getHighlightFunction($language) {
         'yaml' => 'yamlSyntaxHighlight',
         'yml' => 'yamlSyntaxHighlight',
         'markdown' => 'markdownSyntaxHighlight',
-        'md' => 'markdownSyntaxHighlight'
+        'md' => 'markdownSyntaxHighlight',
+        'xml' => 'xmlSyntaxHighlight'
     ];
 
     $language = strtolower($language);
