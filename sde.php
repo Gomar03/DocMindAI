@@ -258,16 +258,24 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
                             if ($OUTPUT_FORMAT === 'yaml') {
                                 // Convert array to YAML and display
                                 $yaml_output = arrayToYaml($result);
-                                // Remove markdown fences if present
-                                $yaml_output = removeMarkdownFence($yaml_output);
-                                echo '<pre>' . htmlspecialchars($yaml_output) . '</pre>';
+                                $fence_info = extractCodeFenceInfo('```yaml' . PHP_EOL . $yaml_output . PHP_EOL . '```');
+                                $highlight_class = !empty($fence_info['type']) ? 'highlight-' . $fence_info['type'] : '';
+                                $yaml_output = $fence_info['text'];
+                                echo '<pre class="' . $highlight_class . '">' . htmlspecialchars($yaml_output) . '</pre>';
                             } else {
                                 // Display as formatted JSON
-                                echo '<pre>' . htmlspecialchars(json_encode($result, JSON_PRETTY_PRINT)) . '</pre>';
+                                $json_output = json_encode($result, JSON_PRETTY_PRINT);
+                                $fence_info = extractCodeFenceInfo('```json' . PHP_EOL . $json_output . PHP_EOL . '```');
+                                $highlight_class = !empty($fence_info['type']) ? 'highlight-' . $fence_info['type'] : '';
+                                $json_output = $fence_info['text'];
+                                echo '<pre class="' . $highlight_class . '">' . htmlspecialchars($json_output) . '</pre>';
                             }
                         } else {
                             // Display as plain text
-                            echo '<pre>' . htmlspecialchars(removeMarkdownFence($result)) . '</pre>';
+                            $fence_info = extractCodeFenceInfo($result);
+                            $highlight_class = !empty($fence_info['type']) ? 'highlight-' . $fence_info['type'] : '';
+                            $text = $fence_info['text'];
+                            echo '<pre class="' . $highlight_class . '">' . htmlspecialchars($text) . '</pre>';
                         }
                         ?>
                     </section>
@@ -351,30 +359,20 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
             window.location.href = window.location.pathname;
         }
 
-        // Apply syntax highlighting to JSON results
+        // Apply syntax highlighting to all pre elements
         document.addEventListener('DOMContentLoaded', function() {
             const jsonElements = document.querySelectorAll('pre');
             jsonElements.forEach(function(element) {
                 try {
                     const text = element.textContent;
-                    if (text.trim().startsWith('{') || text.trim().startsWith('[')) {
+                    if (element.classList.contains('highlight-json') && (text.trim().startsWith('{') || text.trim().startsWith('['))) {
                         const json = JSON.parse(text);
                         element.innerHTML = jsonSyntaxHighlight(json);
+                    } else if (element.classList.contains('highlight-yaml') || element.classList.contains('highlight-yml')) {
+                        element.innerHTML = yamlSyntaxHighlight(text);
                     }
                 } catch (e) {
-                    // Not valid JSON, leave as is
-                }
-            });
-        });
-
-        // Apply YAML syntax highlighting
-        document.addEventListener('DOMContentLoaded', function() {
-            const yamlElements = document.querySelectorAll('pre');
-            yamlElements.forEach(function(element) {
-                const text = element.textContent;
-                // Simple heuristic to detect YAML: contains "key: value" pattern
-                if (text.includes(':') && !text.trim().startsWith('{') && !text.trim().startsWith('[')) {
-                    element.innerHTML = yamlSyntaxHighlight(text);
+                    // Not valid JSON/YAML, leave as is
                 }
             });
         });
