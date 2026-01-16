@@ -347,14 +347,14 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_FILES['image']) || isset(
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image OCR Tool</title>
+    <title>DocMind AI - OCR Tool</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%B7%3C/text%3E%3C/svg%3E">
 </head>
 <body>
     <div class="container">
         <hgroup>
-            <h1>📷 Image OCR Tool</h1>
+            <h1>📷 DocMind AI - OCR Tool</h1>
             <p>AI-powered optical character recognition</p>
         </hgroup>
 

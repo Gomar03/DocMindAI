@@ -324,15 +324,15 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['content']) || (iss
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SOAP Note Generator</title>
+    <title>DocMind AI - Document Processor</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📋%3C/text%3E%3C/svg%3E">
 </head>
 <body>
     <div class="container">
         <hgroup>
-            <h1>📋 SOAP Note Generator</h1>
-            <p>Convert medical transcripts into structured SOAP notes using AI</p>
+            <h1>📋 DocMind AI - Document Processor</h1>
+            <p>Convert transcripts into structured documents using AI</p>
         </hgroup>
 
         <main>

@@ -1,8 +1,8 @@
 <?php
 /**
- * Common functions for medical AI applications
+ * Common functions for DocMind AI
  * 
- * Contains shared functionality used across different medical analysis tools
+ * Contains shared functionality used across different document processing tools
  * 
  * @author Costin Stroie <costinstroie@eridu.eu.org>
  * @version 1.0

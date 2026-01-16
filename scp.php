@@ -289,14 +289,14 @@ function scrapeUrl($url) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Content Parser</title>
+    <title>DocMind AI - Content Parser</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%97%3C/text%3E%3C/svg%3E">
 </head>
 <body>
     <div class="container">
         <hgroup>
-            <h1>🔗 Simple Content Parser</h1>
+            <h1>🔗 DocMind AI - Content Parser</h1>
             <p>AI-powered web page content extractor</p>
         </hgroup>
 

@@ -3,11 +3,11 @@
  * Medical Chat Assistant
  * 
  * A PHP web application that provides a conversational interface with AI models
- * for medical information and assistance.
+ * for document processing and information extraction.
  * 
  * Features:
- * - Real-time chat interface with medical AI
- * - Multiple AI personalities (Medical Assistant, GP, Specialist, Researcher, Skippy)
+ * - Real-time chat interface with document AI
+ * - Multiple AI personalities (Assistant, Specialist, Researcher, Skippy)
  * - Multiple lightweight AI models support (filtered for free models)
  * - Multilingual output (6 languages)
  * - Web interface with real-time results
@@ -255,15 +255,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Medical Chat Assistant</title>
+    <title>DocMind AI - Chat Assistant</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E💬%3C/text%3E%3C/svg%3E">
 </head>
 <body>
     <div class="container">
         <hgroup>
-            <h1>💬 Medical Chat Assistant</h1>
-            <p>This assistant provides medical information but should not replace professional medical advice.</p>
+            <h1>💬 DocMind AI - Chat Assistant</h1>
+            <p>AI-powered document processing and information extraction assistant.</p>
         </hgroup>
         
         <main>
