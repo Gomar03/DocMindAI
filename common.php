@@ -979,4 +979,21 @@ function getProbabilityColor($probability) {
     if ($probability >= 40) return '#3b82f6'; // blue
     return '#10b981'; // green
 }
+
+/**
+ * Get syntax highlighting function for a given language
+ * 
+ * @param string $language Language code
+ * @return string JavaScript function name or empty string if not available
+ */
+function getHighlightFunction($language) {
+    $highlight_functions = [
+        'json' => 'jsonSyntaxHighlight',
+        'yaml' => 'yamlSyntaxHighlight',
+        'yml' => 'yamlSyntaxHighlight'
+    ];
+
+    $language = strtolower($language);
+    return isset($highlight_functions[$language]) ? $highlight_functions[$language] : '';
+}
 ?>
