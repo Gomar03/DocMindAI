@@ -228,8 +228,8 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Structured Data Extractor</title>
     <link rel="stylesheet" href="style.css">
+    <script src="script.js" type="text/javascript"></script>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📊%3C/text%3E%3C/svg%3E">
-    <script src="script.js"></script>
 </head>
 <body>
     <div class="container">
