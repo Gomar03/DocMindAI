@@ -546,6 +546,10 @@ function fetchArticleDetails($ids) {
                 <button type="button" class="btn btn-secondary" onclick="clearForm()">
                     🔄 New Search
                 </button>
+
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='index.php'">
+                    🏠 Back to Main Menu
+                </button>
             </form>
         </main>
     </div>

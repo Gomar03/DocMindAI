@@ -331,6 +331,10 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
                 <button type="button" class="btn btn-secondary" onclick="clearForm()">
                     🔄 New Extraction
                 </button>
+
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='index.php'">
+                    🏠 Back to Main Menu
+                </button>
             </form>
         </main>
     </div>

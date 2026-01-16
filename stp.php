@@ -468,6 +468,10 @@ officedocument.wordprocessingml.document,application/pdf,application/vnd.oasis.o
                 <button type="button" class="btn btn-secondary" onclick="clearForm()">
                     🔄 New Analysis
                 </button>
+
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='index.php'">
+                    🏠 Back to Main Menu
+                </button>
             </form>
         </main>
     </div>

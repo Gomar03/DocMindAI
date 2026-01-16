@@ -448,6 +448,10 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_FILES['image']) || isset(
                 <button type="button" class="btn btn-secondary" onclick="clearForm()">
                     🔄 New OCR
                 </button>
+
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='index.php'">
+                    🏠 Back to Main Menu
+                </button>
             </form>
         </main>
     </div>

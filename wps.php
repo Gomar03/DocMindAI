@@ -445,6 +445,10 @@ function scrapeUrl($url) {
                 <button type="button" class="btn btn-secondary" onclick="clearForm()">
                     🔄 New Summary
                 </button>
+
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='index.php'">
+                    🏠 Back to Main Menu
+                </button>
             </form>
         </main>
     </div>
