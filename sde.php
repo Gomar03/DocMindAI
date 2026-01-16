@@ -259,6 +259,10 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
                                 // Convert array to YAML and display
                                 $response_output = yaml_encode($result);
                                 $highlight_class = 'highlight-yaml';
+                            } elseif ($OUTPUT_FORMAT === 'markdown') {
+                                // Convert array to Markdown and display
+                                $response_output = markdownToHtml($result);
+                                $highlight_class = 'highlight-markdown';
                             } else {
                                 // Display as formatted JSON
                                 $response_output = json_encode($result, JSON_PRETTY_PRINT);
@@ -267,7 +271,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
                             echo '<pre class="' . $highlight_class . '">' . htmlspecialchars($response_output) . '</pre>';
                         } else {
                             // Display as plain text
-                            $fence_info = extractCodeFenceInfo($result, 'markdown');
+                            $fence_info = extractCodeFenceInfo($result, $OUTPUT_FORMAT);
                             $highlight_class = !empty($fence_info['type']) ? 'highlight-' . $fence_info['type'] : '';
                             $text = $fence_info['text'];
                             echo '<pre class="' . $highlight_class . '">' . htmlspecialchars($text) . '</pre>';
@@ -295,6 +299,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
                     <select id="output_format" name="output_format">
                         <option value="json" <?php echo ($OUTPUT_FORMAT === 'json') ? 'selected' : ''; ?>>JSON</option>
                         <option value="yaml" <?php echo ($OUTPUT_FORMAT === 'yaml') ? 'selected' : ''; ?>>YAML</option>
+                        <option value="markdown" <?php echo ($OUTPUT_FORMAT === 'markdown') ? 'selected' : ''; ?>>Markdown</option>
                     </select>
                     <small>
                         Select the output format for the extracted data.
