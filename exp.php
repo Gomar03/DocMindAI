@@ -159,22 +159,64 @@ $is_api_request = false;
  * Processes both web form submissions and API requests
  * Validates input, calls AI API, and processes response
  */
-if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['prompt'])) || 
+if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK))) || 
     ($_SERVER['REQUEST_METHOD'] === 'GET' && !empty($_GET['prompt']))) {
     $processing = true;
     $is_api_request = (!isset($_POST['submit']) && !isset($_GET['submit'])); // If no submit button, it's an API request
 
     // Sanitize and validate input
-    $prompt = trim(isset($_POST['prompt']) ? $_POST['prompt'] : $_GET['prompt']);
+    $prompt = trim(isset($_POST['prompt']) ? $_POST['prompt'] : (isset($_GET['prompt']) ? $_GET['prompt'] : ''));
 
-    // Validate prompt length
-    if (strlen($prompt) > 10000) {
-        $error = 'The prompt is too long. Maximum 10000 characters allowed.';
+    // Handle file upload if present
+    $file_content = '';
+    $is_image = false;
+    $image_data = null;
+
+    if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
+        $file = $_FILES['file'];
+
+        // Validate file size (max 10MB)
+        if ($file['size'] > 10 * 1024 * 1024) {
+            $error = 'The file is too large. Maximum 10MB allowed.';
+            $processing = false;
+        } else {
+            // Check if it's an image
+            $image_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (in_array($file['type'], $image_types)) {
+                $is_image = true;
+                // Read image data
+                $image_data = file_get_contents($file['tmp_name']);
+                if ($image_data === false) {
+                    $error = 'Failed to read the uploaded image.';
+                    $processing = false;
+                }
+            } else {
+                // Text document - try to extract text
+                $file_content = extractTextFromDocument($file['tmp_name'], $file['type']);
+                if ($file_content === false) {
+                    $error = 'Failed to extract text from the uploaded document. Please ensure you have the required tools installed (antiword, catdoc, pdftotext, odt2txt, or pandoc).';
+                    $processing = false;
+                } else {
+                    // Clean up the text content
+                    $file_content = trim($file_content);
+                    // Remove BOM if present
+                    $file_content = preg_replace('/^\xEF\xBB\xBF/', '', $file_content);
+                    // Normalize line endings
+                    $file_content = str_replace(["\r\n", "\r"], "\n", $file_content);
+                }
+            }
+        }
+    }
+
+    // Validate prompt length (including file content if it's text)
+    $total_length = strlen($prompt) + strlen($file_content);
+    if ($total_length > 10000) {
+        $error = 'The prompt (including file content) is too long. Maximum 10000 characters allowed.';
         $processing = false;
     }
-    // Validate prompt is not empty after trimming
-    elseif (empty($prompt)) {
-        $error = 'The prompt cannot be empty.';
+    // Validate prompt is not empty after trimming (unless we have an image)
+    elseif (empty($prompt) && !$is_image) {
+        $error = 'The prompt cannot be empty unless you upload an image.';
         $processing = false;
     }
 
@@ -184,10 +226,30 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['prompt'])) ||
         $api_data = [
             'model' => $MODEL,
             'messages' => [
-                ['role' => 'system', 'content' => getLanguageInstruction($LANGUAGE)],
-                ['role' => 'user', 'content' => $prompt]
+                ['role' => 'system', 'content' => getLanguageInstruction($LANGUAGE)]
             ]
         ];
+
+        // Add user message with prompt and file content
+        $user_content = $prompt;
+        if (!empty($file_content)) {
+            $user_content .= "\n\nFILE CONTENT:\n" . $file_content;
+        }
+
+        $api_data['messages'][] = ['role' => 'user', 'content' => $user_content];
+
+        // If it's an image, add it as a separate message with image data
+        if ($is_image && $image_data !== null) {
+            // Convert image to base64
+            $base64_image = base64_encode($image_data);
+            $mime_type = $file['type'];
+            $api_data['messages'][] = [
+                'role' => 'user',
+                'content' => [
+                    ['type' => 'image_url', 'image_url' => ['url' => "data:$mime_type;base64,$base64_image"]]
+                ]
+            ];
+        }
 
         // Make API request using common function
         $response_data = callLLMApi($LLM_API_ENDPOINT_CHAT, $api_data, $LLM_API_KEY);
@@ -263,7 +325,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['prompt'])) ||
                 </section>
             <?php endif; ?>
 
-            <form method="POST" action="" id="experimentForm">
+            <form method="POST" action="" id="experimentForm" enctype="multipart/form-data">
                 <fieldset>
                     <?php if (!empty($PREDEFINED_PROMPTS)): ?>
                         <label for="prompt_type">Predefined Prompt:</label>
@@ -298,6 +360,16 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['prompt'])) ||
                     ?></textarea>
                     <small>
                         Edit the prompt text as needed. The selected predefined prompt will be loaded here.
+                    </small>
+
+                    <label for="file">Optional file upload:</label>
+                    <input
+                        type="file"
+                        id="file"
+                        name="file"
+                        accept=".txt,.md,.doc,.docx,.pdf,.odt,.jpg,.jpeg,.png,.gif,.webp,text/plain,text/markdown,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,application/vnd.oasis.opendocument.text,image/jpeg,image/png,image/gif,image/webp">
+                    <small>
+                        Upload a text document (content will be appended to prompt) or an image (will be sent with prompt).
                     </small>
 
                     <label for="model">AI model:</label>
