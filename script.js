@@ -49,3 +49,46 @@ function yamlSyntaxHighlight(yaml) {
 
     return yaml;
 }
+
+// Markdown syntax highlighting function
+function markdownSyntaxHighlight(markdown) {
+    // Escape HTML entities first
+    markdown = markdown.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    // Headers
+    markdown = markdown.replace(/^(#{1,6})\s+(.+)$/gm, function(match, hashes, text) {
+        const level = hashes.length;
+        return '<h' + level + ' class="markdown-header">' + text + '</h' + level + '>';
+    });
+
+    // Bold (**text** or __text__)
+    markdown = markdown.replace(/\*\*(.+?)\*\*/g, '<strong class="markdown-bold">$1</strong>');
+    markdown = markdown.replace(/__(.+?)__/g, '<strong class="markdown-bold">$1</strong>');
+
+    // Italic (*text* or _text_)
+    markdown = markdown.replace(/\*(.+?)\*/g, '<em class="markdown-italic">$1</em>');
+    markdown = markdown.replace(/_(.+?)_/g, '<em class="markdown-italic">$1</em>');
+
+    // Inline code (`code`)
+    markdown = markdown.replace(/`(.+?)`/g, '<code class="markdown-code">$1</code>');
+
+    // Links [text](url)
+    markdown = markdown.replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="markdown-link">$1</a>');
+
+    // Images ![alt](url)
+    markdown = markdown.replace(/!\[(.+?)\]\((.+?)\)/g, '<img src="$2" alt="$1" class="markdown-image">');
+
+    // Unordered lists
+    markdown = markdown.replace(/^[\*\-]\s+(.+)$/gm, '<li class="markdown-list-item">$1</li>');
+
+    // Ordered lists
+    markdown = markdown.replace(/^\d+\.\s+(.+)$/gm, '<li class="markdown-list-item">$1</li>');
+
+    // Blockquotes
+    markdown = markdown.replace(/^>\s+(.+)$/gm, '<blockquote class="markdown-blockquote">$1</blockquote>');
+
+    // Horizontal rule
+    markdown = markdown.replace(/^(\*{3,}|-{3,}|_{3,})$/gm, '<hr class="markdown-hr">');
+
+    return markdown;
+}
