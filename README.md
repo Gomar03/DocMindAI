@@ -1,6 +1,6 @@
-# AI Tools Suite
+# DocMind AI
 
-A comprehensive collection of 10 PHP web applications that use AI to process documents and extract key information in structured formats.
+A comprehensive collection of PHP web applications that use AI to process documents and extract key information in structured formats.
 
 ## Tools Included
 
