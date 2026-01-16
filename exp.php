@@ -257,8 +257,13 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
         if (isset($response_data['error'])) {
             $error = $response_data['error'];
         } elseif (isset($response_data['choices'][0]['message']['content'])) {
-            $content = trim($response_data['choices'][0]['message']['content']);
-            $result = $content;
+            $content = $response_data['choices'][0]['message']['content'];
+            // Handle both string and array responses
+            if (is_array($content)) {
+                $result = $content;
+            } else {
+                $result = trim($content);
+            }
         } else {
             $error = 'Invalid API response format';
         }
