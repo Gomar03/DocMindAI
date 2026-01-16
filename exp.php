@@ -498,10 +498,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
                 echo json_encode($allPrompts);
             ?>;
 
-            if (promptType === 'current') {
-                // Keep the current prompt value
-                return;
-            } else if (predefinedPrompts[promptType]) {
+            if (predefinedPrompts[promptType]) {
                 promptTextarea.value = predefinedPrompts[promptType].prompt;
             } else {
                 promptTextarea.value = '';

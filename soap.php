@@ -261,7 +261,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['content']) || (iss
 
         // Add user message with content (only if content is not empty)
         if (!empty($content)) {
-            $user_content = "MEDICAL TRANSCRIPT TO CONVERT TO SOAP FORMAT:\n" . $content;
+            $user_content = "MEDICAL TRANSCRIPT:\n" . $content;
             $api_data['messages'][] = ['role' => 'user', 'content' => $user_content];
         }
 
