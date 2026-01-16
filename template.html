@@ -20,12 +20,12 @@
 
         <main>
             <!-- Error message section -->
-            <section role="alert" class="error" id="error-section" style="display: none;">
+            <section role="alert" class="error" id="error-section" style="display: block;">
                 <strong>⚠️ Error:</strong> <span id="error-message"></span>
             </section>
 
             <!-- Results section -->
-            <section id="results-section" style="display: none;">
+            <section id="results-section" style="display: block;">
                 <article>
                     <header>
                         <h2>[Results Title]</h2>
@@ -42,23 +42,7 @@
                 </article>
 
                 <!-- Output panel for displaying results -->
-                <article id="output-panel" style="display: none;">
-                    <header>
-                        <h2>[Output Title]</h2>
-                    </header>
-
-                    <section>
-                        <h3>[Output Section]</h3>
-                        <div id="output-content" class="markdown-result">
-                            <!-- Dynamic output content will be inserted here -->
-                        </div>
-                    </section>
-
-                    <!-- Additional output sections as needed -->
-                </article>
-
-                <!-- Output panel for displaying results -->
-                <article id="output-panel" style="display: none;">
+                <article id="output-panel" style="display: block;">
                     <header>
                         <h2>[Output Title]</h2>
                     </header>
@@ -180,18 +164,6 @@
                 document.getElementById('results-section').style.display = 'block';
                 document.getElementById('result-content').innerHTML = '<p>This is mock result content. Replace with actual API response.</p>';
             }, 1500);
-        });
-
-        // Check configuration status
-        function checkConfigStatus() {
-            // This would be replaced with actual configuration check
-            return '<div class="config-ok">Configuration loaded successfully</div>';
-        }
-
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set configuration notice
-            document.querySelector('.config-notice').innerHTML = checkConfigStatus();
         });
     </script>
 </body>
