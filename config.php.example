@@ -1,10 +1,58 @@
 <?php
-// DocMind AI API Configuration
-$LLM_API_ENDPOINT = 'http://127.0.0.1:11434/v1';
-$LLM_API_KEY = '';
-$DEFAULT_TEXT_MODEL = 'qwen2.5:1.5b';
-$LLM_API_FILTER = '/free/';
+/**
+ * Configuration file for DocMind AI
+ *
+ * IMPORTANT: This file should be renamed to config.php and placed in the same directory
+ * as the application files. Do not commit config.php to version control as it may contain
+ * sensitive information.
+ *
+ * @author Costin Stroie <costinstroie@eridu.eu.org>
+ * @license GPL 3
+ */
 
-// Chat Configuration
-$CHAT_HISTORY_LENGTH = 10;
+/**
+ * AI API Configuration
+ *
+ * @var string $LLM_API_ENDPOINT The base URL for your AI API endpoint
+ * @var string $LLM_API_KEY Your API key if required (leave empty if not needed)
+ * @var string $DEFAULT_TEXT_MODEL Default model for text processing
+ * @var string $DEFAULT_VISION_MODEL Default model for vision/image processing
+ * @var string $LLM_API_FILTER Regular expression to filter available models
+ */
+$LLM_API_ENDPOINT = 'http://127.0.0.1:11434/v1'; // Your AI API endpoint
+$LLM_API_KEY = ''; // API key if required
+$DEFAULT_TEXT_MODEL = 'qwen2.5:1.5b'; // Default text model
+$DEFAULT_VISION_MODEL = 'gemma3:4b'; // Default vision model
+$LLM_API_FILTER = '/free/'; // Regular expression to filter models
+
+/**
+ * Application Configuration
+ *
+ * @var int $CHAT_HISTORY_LENGTH Maximum number of messages to keep in chat history
+ */
+$CHAT_HISTORY_LENGTH = 10; // Maximum chat history length
+
+/**
+ * Security Configuration
+ *
+ * @var bool $DEBUG_MODE Enable debug mode for development
+ * @var array $ALLOWED_ORIGINS List of allowed origins for CORS
+ */
+$DEBUG_MODE = false; // Set to true for development/debugging
+$ALLOWED_ORIGINS = ['*']; // List of allowed origins for CORS
+
+/**
+ * File Upload Configuration
+ *
+ * @var int $MAX_FILE_SIZE Maximum file size for uploads in bytes
+ * @var array $ALLOWED_FILE_TYPES Allowed file types for uploads
+ */
+$MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+$ALLOWED_FILE_TYPES = [
+    'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+    'application/pdf',
+    'text/plain', 'text/markdown',
+    'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.oasis.opendocument.text'
+];
 ?>
