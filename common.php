@@ -996,4 +996,28 @@ function getHighlightFunction($language) {
     $language = strtolower($language);
     return isset($highlight_functions[$language]) ? $highlight_functions[$language] : '';
 }
+
+/**
+ * Extract code fence information from text
+ * 
+ * @param string $text Text to analyze
+ * @return array Array with 'type', 'class', and 'text' keys
+ */
+function extractCodeFenceInfo($text) {
+    $result = [
+        'type' => '',
+        'class' => '',
+        'text' => $text,
+        'function' => ''
+    ];
+
+    if (preg_match('/^```([a-zA-Z0-9_-]*)\s*(.*?)\s*```$/s', $text, $matches)) {
+        $result['type'] = !empty($matches[1]) ? strtolower($matches[1]) : '';
+        $result['class'] = !empty($matches[1]) ? 'highlight-' . strtolower($matches[1]) : 'highlight-text';
+        $result['text'] = $matches[2];
+        $result['function'] = getHighlightFunction($result['type']);
+    }
+
+    return $result;
+}
 ?>
