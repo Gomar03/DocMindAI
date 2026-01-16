@@ -351,7 +351,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
         }
 
         // JSON syntax highlighting function
-        function syntaxHighlight(json) {
+        function jsonSyntaxHighlight(json) {
             if (typeof json !== 'string') {
                 json = JSON.stringify(json, undefined, 2);
             }
@@ -381,7 +381,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
                     const text = element.textContent;
                     if (text.trim().startsWith('{') || text.trim().startsWith('[')) {
                         const json = JSON.parse(text);
-                        element.innerHTML = syntaxHighlight(json);
+                        element.innerHTML = jsonSyntaxHighlight(json);
                     }
                 } catch (e) {
                     // Not valid JSON, leave as is
