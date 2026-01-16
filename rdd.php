@@ -224,16 +224,24 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) ||
         } elseif (isset($response_data['choices'][0]['message']['content'])) {
             $content = trim($response_data['choices'][0]['message']['content']);
             
-            // Try to extract JSON from response (in case model adds extra text)
-            $json_str = null;
-            
-            // First try to find JSON between code fences
-            if (preg_match('/```(?:json)?\s*({.*?})\s*```/s', $content, $matches)) {
-                $json_str = $matches[1];
-            } 
-            // Then try to find any JSON object
-            elseif (preg_match('/\{.*\}/s', $content, $matches)) {
-                $json_str = $matches[0];
+            // Extract JSON from response
+            // First try direct JSON parsing
+            $json_str = trim($content);
+
+            // If direct parsing fails, try to extract from code blocks or other patterns
+            if (json_decode($json_str) === null) {
+                $json_patterns = [
+                    '/```(?:json)?\s*({.*?})\s*```/s',  // JSON in code blocks
+                    '/\{.*\}/s',                        // Any JSON object
+                    '/({.*?})/s'                        // Capture any braces
+                ];
+
+                foreach ($json_patterns as $pattern) {
+                    if (preg_match($pattern, $content, $matches)) {
+                        $json_str = $matches[1];
+                        break;
+                    }
+                }
             }
             
             if ($json_str) {

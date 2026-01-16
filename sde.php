@@ -165,13 +165,34 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
                 // For YAML, we'll use the raw content and try to convert it
                 $result = $content;
             } else {
-                // For JSON, try to extract JSON from response
-                $json_result = extractJsonFromResponse($content);
+                // For JSON, extract JSON from response
+                // First try direct JSON parsing
+                $json_str = trim($content);
 
-                if ($json_result) {
-                    $result = $json_result;
+                // If direct parsing fails, try to extract from code blocks or other patterns
+                if (json_decode($json_str) === null) {
+                    $json_patterns = [
+                        '/```(?:json)?\s*({.*?})\s*```/s',  // JSON in code blocks
+                        '/\{.*\}/s',                        // Any JSON object
+                        '/({.*?})/s'                        // Capture any braces
+                    ];
+
+                    foreach ($json_patterns as $pattern) {
+                        if (preg_match($pattern, $content, $matches)) {
+                            $json_str = $matches[1];
+                            break;
+                        }
+                    }
+                }
+
+                if ($json_str) {
+                    $json_result = json_decode($json_str, true);
+                    if ($json_result) {
+                        $result = $json_result;
+                    } else {
+                        $result = $content;
+                    }
                 } else {
-                    // If no JSON found, use raw content
                     $result = $content;
                 }
             }

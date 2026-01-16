@@ -234,8 +234,31 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['query'])) ||
                 } elseif (isset($response_data['choices'][0]['message']['content'])) {
                     $content = trim($response_data['choices'][0]['message']['content']);
                     
-                    // Extract JSON from response (in case model adds extra text)
-                    $json_result = extractJsonFromResponse($content);
+                    // Extract JSON from response
+                    // First try direct JSON parsing
+                    $json_str = trim($content);
+
+                    // If direct parsing fails, try to extract from code blocks or other patterns
+                    if (json_decode($json_str) === null) {
+                        $json_patterns = [
+                            '/```(?:json)?\s*({.*?})\s*```/s',  // JSON in code blocks
+                            '/\{.*\}/s',                        // Any JSON object
+                            '/({.*?})/s'                        // Capture any braces
+                        ];
+
+                        foreach ($json_patterns as $pattern) {
+                            if (preg_match($pattern, $content, $matches)) {
+                                $json_str = $matches[1];
+                                break;
+                            }
+                        }
+                    }
+
+                    if ($json_str) {
+                        $json_result = json_decode($json_str, true);
+                    } else {
+                        $json_result = null;
+                    }
                     
                     if ($json_result) {
                         $result[] = $json_result;
