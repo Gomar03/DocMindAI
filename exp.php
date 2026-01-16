@@ -335,17 +335,45 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
                                         <?php if (isset($content_item['type']) && $content_item['type'] === 'image_url'): ?>
                                             <img src="<?php echo htmlspecialchars($content_item['image_url']['url']); ?>" alt="Uploaded image" style="max-width: 100%; height: auto; margin: 10px 0;">
                                         <?php else: ?>
-                                            <pre><?php echo htmlspecialchars($content_item['text'] ?? ''); ?></pre>
+                                            <?php
+                                                $text = $content_item['text'] ?? '';
+                                                $highlight_class = '';
+                                                if (preg_match('/^```([a-zA-Z0-9_-]*)\s*(.*?)\s*```$/s', $text, $matches)) {
+                                                    $highlight_class = !empty($matches[1]) ? 'highlight-' . strtolower($matches[1]) : 'highlight-text';
+                                                    $text = $matches[2];
+                                                }
+                                            ?>
+                                            <pre class="<?php echo $highlight_class; ?>"><?php echo htmlspecialchars($text); ?></pre>
                                         <?php endif; ?>
                                     <?php endforeach; ?>
                                 <?php else: ?>
-                                    <pre><?php echo htmlspecialchars($result['content']); ?></pre>
+                                    <?php
+                                        $text = $result['content'];
+                                        $highlight_class = '';
+                                        if (preg_match('/^```([a-zA-Z0-9_-]*)\s*(.*?)\s*```$/s', $text, $matches)) {
+                                            $highlight_class = !empty($matches[1]) ? 'highlight-' . strtolower($matches[1]) : 'highlight-text';
+                                            $text = $matches[2];
+                                        }
+                                    ?>
+                                    <pre class="<?php echo $highlight_class; ?>"><?php echo htmlspecialchars($text); ?></pre>
                                 <?php endif; ?>
                             <?php else: ?>
-                                <pre><?php echo htmlspecialchars(json_encode($result, JSON_PRETTY_PRINT)); ?></pre>
+                                <?php
+                                    $text = json_encode($result, JSON_PRETTY_PRINT);
+                                    $highlight_class = 'highlight-json';
+                                ?>
+                                <pre class="<?php echo $highlight_class; ?>"><?php echo htmlspecialchars($text); ?></pre>
                             <?php endif; ?>
                         <?php else: ?>
-                            <pre><?php echo htmlspecialchars($result); ?></pre>
+                            <?php
+                                $text = $result;
+                                $highlight_class = '';
+                                if (preg_match('/^```([a-zA-Z0-9_-]*)\s*(.*?)\s*```$/s', $text, $matches)) {
+                                    $highlight_class = !empty($matches[1]) ? 'highlight-' . strtolower($matches[1]) : 'highlight-text';
+                                    $text = $matches[2];
+                                }
+                            ?>
+                            <pre class="<?php echo $highlight_class; ?>"><?php echo htmlspecialchars($text); ?></pre>
                         <?php endif; ?>
                     </section>
                 </article>
