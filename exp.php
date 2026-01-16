@@ -337,65 +337,43 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
                                         <?php else: ?>
                                             <?php
                                                 $text = $content_item['text'] ?? '';
-                                                $highlight_class = '';
-                                                $highlight_function = '';
-                                                if (preg_match('/^```([a-zA-Z0-9_-]*)\s*(.*?)\s*```$/s', $text, $matches)) {
-                                                    $highlight_class = !empty($matches[1]) ? 'highlight-' . strtolower($matches[1]) : 'highlight-text';
-                                                    $text = $matches[2];
-                                                    $lang = strtolower($matches[1]);
-                                                    $highlight_function = getHighlightFunction($lang);
-                                                }
+                                                $fence_info = extractCodeFenceInfo($text);
+                                                $highlight_class = !empty($fence_info['type']) ? 'highlight-' . $fence_info['type'] : '';
+                                                $text = $fence_info['text'];
+                                                $highlight_function = $fence_info['function'];
                                             ?>
-                                            <?php if (!empty($highlight_function)): ?>
-                                                <pre class="<?php echo $highlight_class; ?>"><?php echo htmlspecialchars($text); ?></pre>
-                                            <?php else: ?>
-                                                <pre class="<?php echo $highlight_class; ?>"><?php echo htmlspecialchars($text); ?></pre>
-                                            <?php endif; ?>
+                                            <pre class="<?php echo $highlight_class; ?>"><?php echo htmlspecialchars($text); ?></pre>
                                         <?php endif; ?>
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <?php
                                         $text = $result['content'];
-                                        $highlight_class = '';
-                                        $highlight_function = '';
-                                        if (preg_match('/^```([a-zA-Z0-9_-]*)\s*(.*?)\s*```$/s', $text, $matches)) {
-                                            $highlight_class = !empty($matches[1]) ? 'highlight-' . strtolower($matches[1]) : 'highlight-text';
-                                            $text = $matches[2];
-                                            $lang = strtolower($matches[1]);
-                                            $highlight_function = getHighlightFunction($lang);
-                                        }
+                                        $fence_info = extractCodeFenceInfo($text);
+                                        $highlight_class = !empty($fence_info['type']) ? 'highlight-' . $fence_info['type'] : '';
+                                        $text = $fence_info['text'];
+                                        $highlight_function = $fence_info['function'];
                                     ?>
-                                    <?php if (!empty($highlight_function)): ?>
-                                        <pre class="<?php echo $highlight_class; ?>"><?php echo htmlspecialchars($text); ?></pre>
-                                    <?php else: ?>
-                                        <pre class="<?php echo $highlight_class; ?>"><?php echo htmlspecialchars($text); ?></pre>
-                                    <?php endif; ?>
+                                    <pre class="<?php echo $highlight_class; ?>"><?php echo htmlspecialchars($text); ?></pre>
                                 <?php endif; ?>
                             <?php else: ?>
                                 <?php
                                     $text = json_encode($result, JSON_PRETTY_PRINT);
-                                    $highlight_class = 'highlight-json';
-                                    $highlight_function = getHighlightFunction('json');
+                                    $fence_info = extractCodeFenceInfo('```json' . PHP_EOL . $text . PHP_EOL . '```');
+                                    $highlight_class = !empty($fence_info['type']) ? 'highlight-' . $fence_info['type'] : '';
+                                    $text = $fence_info['text'];
+                                    $highlight_function = $fence_info['function'];
                                 ?>
                                 <pre class="<?php echo $highlight_class; ?>"><?php echo htmlspecialchars($text); ?></pre>
                             <?php endif; ?>
                         <?php else: ?>
                             <?php
                                 $text = $result;
-                                $highlight_class = '';
-                                $highlight_function = '';
-                                if (preg_match('/^```([a-zA-Z0-9_-]*)\s*(.*?)\s*```$/s', $text, $matches)) {
-                                    $highlight_class = !empty($matches[1]) ? 'highlight-' . strtolower($matches[1]) : 'highlight-text';
-                                    $text = $matches[2];
-                                    $lang = strtolower($matches[1]);
-                                    $highlight_function = getHighlightFunction($lang);
-                                }
+                                $fence_info = extractCodeFenceInfo($text);
+                                $highlight_class = !empty($fence_info['type']) ? 'highlight-' . $fence_info['type'] : '';
+                                $text = $fence_info['text'];
+                                $highlight_function = $fence_info['function'];
                             ?>
-                            <?php if (!empty($highlight_function)): ?>
-                                <pre class="<?php echo $highlight_class; ?>"><?php echo htmlspecialchars($text); ?></pre>
-                            <?php else: ?>
-                                <pre class="<?php echo $highlight_class; ?>"><?php echo htmlspecialchars($text); ?></pre>
-                            <?php endif; ?>
+                            <pre class="<?php echo $highlight_class; ?>"><?php echo htmlspecialchars($text); ?></pre>
                         <?php endif; ?>
                     </section>
                 </article>
