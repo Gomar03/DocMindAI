@@ -28,6 +28,10 @@ include 'common.php';
             <p>A collection of specialized tools designed to process, analyze, and extract key information from various documents using artificial intelligence.</p>
         </hgroup>
 
+        <div class="config-notice">
+            <?php echo checkConfigStatus(); ?>
+        </div>
+
         <main>
             <section class="tool-section">
                 <h2>🏥 Medical Document Processing</h2>

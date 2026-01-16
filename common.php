@@ -772,6 +772,27 @@ function arrayToYaml($array) {
     return $yaml;
 }
 
+/**
+ * Check if config.php is available and show configuration instructions if needed
+ *
+ * @return string HTML message about configuration status
+ */
+function checkConfigStatus() {
+    if (file_exists('config.php')) {
+        return '<div class="config-status success">✅ Configuration file found. System is ready to use.</div>';
+    } else {
+        $message = '<div class="config-status warning">';
+        $message .= '⚠️ Configuration file not found. Please create config.php with your settings.';
+        $message .= '<div class="config-instructions">';
+        $message .= '<p>Copy config.php.example to config.php and edit it with your API settings:</p>';
+        $message .= '<pre>cp config.php.example config.php</pre>';
+        $message .= '<p>Then edit config.php to set your LLM API endpoint and other options.</p>';
+        $message .= '</div>';
+        $message .= '</div>';
+        return $message;
+    }
+}
+
 function removeMarkdownFence(string $text): string
 {
     // Remove opening fence (``` or ```lang)
