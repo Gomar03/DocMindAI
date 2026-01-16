@@ -311,12 +311,15 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
                 <section role="alert" class="error">
                     <strong>⚠️ Error:</strong>
                     <?php if (is_array($error)): ?>
-                        <pre><?php echo jsonSyntaxHighlight(json_encode($error, JSON_PRETTY_PRINT)); ?></pre>
+                        <pre><?php echo json_encode($error, JSON_PRETTY_PRINT); ?></pre>
                     <?php else: ?>
                         <?php echo htmlspecialchars($error); ?>
                     <?php endif; ?>
                 </section>
             <?php endif; ?>
+            <section>
+                <?php echo var_dump($result); ?>
+            </section>
 
             <?php if ($result): ?>
                 <article>
