@@ -144,9 +144,43 @@ function formatFileSize($bytes) {
 }
 
 /**
+ * Resize an image while maintaining aspect ratio
+ *
+ * @param resource $image GD image resource
+ * @param int $max_size Maximum dimension (width or height)
+ * @return array|false Array with resized image resource and new dimensions, or false on error
+ */
+function resizeImage($image, $max_size = 1000) {
+    $width = imagesx($image);
+    $height = imagesy($image);
+
+    // Only scale if image is larger than max_size
+    if ($width > $max_size || $height > $max_size) {
+        // Calculate new dimensions (max 1000x1000)
+        $ratio = min($max_size / $width, $max_size / $height);
+        $new_width = intval($width * $ratio);
+        $new_height = intval($height * $ratio);
+
+        // Create new image with new dimensions
+        $resized_image = imagecreatetruecolor($new_width, $new_height);
+    } else {
+        // Keep original dimensions
+        $new_width = $width;
+        $new_height = $height;
+        $resized_image = imagecreatetruecolor($new_width, $new_height);
+    }
+
+    return [
+        'image' => $resized_image,
+        'width' => $new_width,
+        'height' => $new_height
+    ];
+}
+
+/**
  * Preprocess image for better OCR results
  * Enhances contrast, applies threshold, and resizes image
- * 
+ *
  * @param string $image_path Path to the original image
  * @param bool $apply_threshold Whether to apply threshold (default: false)
  * @param bool $apply_dilation Whether to apply dilation (default: false)
@@ -185,27 +219,12 @@ function preprocessImageForOCR($image_path, $apply_threshold = false, $apply_dil
         return false;
     }
     
-    // Get original dimensions
-    $width = imagesx($image);
-    $height = imagesy($image);
-    
-    // Only scale if image is larger than max_size
-    $max_size = 1000;
-    if ($width > $max_size || $height > $max_size) {
-        // Calculate new dimensions (max 1000x1000)
-        $ratio = min($max_size / $width, $max_size / $height);
-        $new_width = intval($width * $ratio);
-        $new_height = intval($height * $ratio);
-        
-        // Create new image with new dimensions
-        $resized_image = imagecreatetruecolor($new_width, $new_height);
-    } else {
-        // Keep original dimensions
-        $new_width = $width;
-        $new_height = $height;
-        $resized_image = imagecreatetruecolor($new_width, $new_height);
-    }
-    
+    // Resize image
+    $resize_result = resizeImage($image);
+    $resized_image = $resize_result['image'];
+    $new_width = $resize_result['width'];
+    $new_height = $resize_result['height'];
+
     // Preserve transparency for PNG
     if ($image_info[2] === IMAGETYPE_PNG) {
         imagealphablending($resized_image, false);
@@ -213,7 +232,7 @@ function preprocessImageForOCR($image_path, $apply_threshold = false, $apply_dil
         $transparent = imagecolorallocatealpha($resized_image, 255, 255, 255, 127);
         imagefilledrectangle($resized_image, 0, 0, $new_width, $new_height, $transparent);
     }
-    
+
     // Resize image
     imagecopyresampled($resized_image, $image, 0, 0, 0, 0, $new_width, $new_height, $width, $height);
     
