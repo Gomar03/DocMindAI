@@ -281,9 +281,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
         // Prepare API request
         $api_data = [
             'model' => $MODEL,
-            'messages' => [
-                ['role' => 'system', 'content' => getLanguageInstruction($LANGUAGE)]
-            ]
+            'messages' => []
         ];
 
         // Add user message with prompt and file content
