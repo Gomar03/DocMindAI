@@ -219,7 +219,7 @@ function preprocessImageForOCR($image_path, $apply_threshold = false, $apply_dil
     
     // Convert to grayscale
     imagefilter($resized_image, IMG_FILTER_GRAYSCALE);
-    
+
     // Apply threshold with Otsu's method approximation if enabled
     if ($apply_threshold) {
         // Calculate histogram
@@ -227,7 +227,7 @@ function preprocessImageForOCR($image_path, $apply_threshold = false, $apply_dil
         for ($i = 0; $i < 256; $i++) {
             $histogram[$i] = 0;
         }
-        
+
         // Build histogram
         for ($y = 0; $y < $new_height; $y++) {
             for ($x = 0; $x < $new_width; $x++) {
@@ -236,39 +236,39 @@ function preprocessImageForOCR($image_path, $apply_threshold = false, $apply_dil
                 $histogram[$r]++;
             }
         }
-        
+
         // Calculate Otsu threshold
         $total_pixels = $new_width * $new_height;
         $sum = 0;
         for ($i = 0; $i < 256; $i++) {
             $sum += $i * $histogram[$i];
         }
-        
+
         $sumB = 0;
         $wB = 0;
         $wF = 0;
         $varMax = 0;
         $threshold = 0;
-        
+
         for ($i = 0; $i < 256; $i++) {
             $wB += $histogram[$i];
             if ($wB == 0) continue;
-            
+
             $wF = $total_pixels - $wB;
             if ($wF == 0) break;
-            
+
             $sumB += $i * $histogram[$i];
             $mB = $sumB / $wB;
             $mF = ($sum - $sumB) / $wF;
-            
+
             $varBetween = $wB * $wF * ($mB - $mF) * ($mB - $mF);
-            
+
             if ($varBetween > $varMax) {
                 $varMax = $varBetween;
                 $threshold = $i;
             }
         }
-        
+
         // Apply threshold
         for ($y = 0; $y < $new_height; $y++) {
             for ($x = 0; $x < $new_width; $x++) {
@@ -280,12 +280,12 @@ function preprocessImageForOCR($image_path, $apply_threshold = false, $apply_dil
             }
         }
     }
-    
+
     // Apply dilation (1x1 kernel) if enabled
     if ($apply_dilation) {
         $dilated_image = imagecreatetruecolor($new_width, $new_height);
         imagecopy($dilated_image, $resized_image, 0, 0, 0, 0, $new_width, $new_height);
-        
+
         for ($y = 1; $y < $new_height - 1; $y++) {
             for ($x = 1; $x < $new_width - 1; $x++) {
                 $is_black = false;
@@ -310,17 +310,17 @@ function preprocessImageForOCR($image_path, $apply_threshold = false, $apply_dil
         // If dilation is not applied, use the resized image directly
         $dilated_image = $resized_image;
     }
-    
+
     // Save as PNG
     $success = imagepng($dilated_image, $temp_path, 9); // Compression level 9
-    
+
     // Clean up
     imagedestroy($image);
     imagedestroy($resized_image);
     if ($apply_dilation) {
         imagedestroy($dilated_image);
     }
-    
+
     return $success ? $temp_path : false;
 }
 
