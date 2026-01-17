@@ -205,7 +205,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
                 }
 
                 if ($image === false) {
-                    $error = 'Failed to read the uploaded image.';
+                    $error = "Failed to read the uploaded " . $file['type'] . " image.";
                     $processing = false;
                 } else {
                     // Get max image size from form or use default
