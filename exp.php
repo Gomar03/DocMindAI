@@ -189,19 +189,34 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
                 $is_image = true;
                 // Create image resource from uploaded file
                 $image = null;
-                switch ($file['type']) {
-                    case 'image/jpeg':
-                        $image = imagecreatefromjpeg($file['tmp_name']);
-                        break;
-                    case 'image/png':
-                        $image = imagecreatefrompng($file['tmp_name']);
-                        break;
-                    case 'image/gif':
-                        $image = imagecreatefromgif($file['tmp_name']);
-                        break;
-                    case 'image/webp':
-                        $image = imagecreatefromwebp($file['tmp_name']);
-                        break;
+
+                // Try to detect actual image type from file content
+                $image_info = @getimagesize($file['tmp_name']);
+                if ($image_info === false) {
+                    $error = "Failed to detect image type from the uploaded file.";
+                    $processing = false;
+                } else {
+                    $detected_mime = $image_info['mime'];
+
+                    // Use detected MIME type instead of browser-reported type
+                    switch ($detected_mime) {
+                        case 'image/jpeg':
+                            $image = imagecreatefromjpeg($file['tmp_name']);
+                            break;
+                        case 'image/png':
+                            $image = imagecreatefrompng($file['tmp_name']);
+                            break;
+                        case 'image/gif':
+                            $image = imagecreatefromgif($file['tmp_name']);
+                            break;
+                        case 'image/webp':
+                            $image = imagecreatefromwebp($file['tmp_name']);
+                            break;
+                        default:
+                            $error = "Unsupported image type: " . htmlspecialchars($detected_mime);
+                            $processing = false;
+                            break;
+                    }
                 }
 
                 if ($image === false) {
