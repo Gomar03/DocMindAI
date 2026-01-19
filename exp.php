@@ -237,6 +237,11 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
                         // Resize the image
                         $resize_result = resizeImage($image, intval($max_size));
                         $resized_image = $resize_result['image'];
+                        $new_width = $resize_result['width'];
+                        $new_height = $resize_result['height'];
+
+                        // Copy the original image to the resized image
+                        imagecopyresampled($resized_image, $image, 0, 0, 0, 0, $new_width, $new_height, imagesx($image), imagesy($image));
 
                         // Save resized image to temporary file as PNG
                         $temp_image_path = tempnam(sys_get_temp_dir(), 'exp_') . '.png';
