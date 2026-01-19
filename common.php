@@ -200,6 +200,103 @@ function resizeImage($image, $max_size = 1000) {
 }
 
 /**
+ * Process uploaded image file
+ *
+ * @param array $file Uploaded file array from $_FILES
+ * @param string $max_size Maximum dimension for resizing ('original' or numeric)
+ * @return array|false Array with image data and MIME type, or false on error
+ */
+function processUploadedImage($file, $max_size = '500') {
+    // Validate file size
+    if ($file['size'] > MAX_FILE_SIZE) {
+        return ['error' => 'The file is too large. Maximum ' . (MAX_FILE_SIZE / 1024 / 1024) . 'MB allowed.'];
+    }
+
+    // Check if it's an image
+    $image_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!in_array($file['type'], $image_types)) {
+        return ['error' => 'Unsupported file type. Please upload an image file.'];
+    }
+
+    // Try to detect actual image type from file content
+    $image_info = @getimagesize($file['tmp_name']);
+    if ($image_info === false) {
+        return ['error' => "Failed to detect image type from the uploaded file."];
+    }
+
+    $detected_mime = $image_info['mime'];
+
+    // Create image resource from uploaded file
+    $image = null;
+    switch ($detected_mime) {
+        case 'image/jpeg':
+            $image = imagecreatefromjpeg($file['tmp_name']);
+            break;
+        case 'image/png':
+            $image = imagecreatefrompng($file['tmp_name']);
+            break;
+        case 'image/gif':
+            $image = imagecreatefromgif($file['tmp_name']);
+            break;
+        case 'image/webp':
+            $image = imagecreatefromwebp($file['tmp_name']);
+            break;
+        default:
+            return ['error' => "Unsupported image type: " . htmlspecialchars($detected_mime)];
+    }
+
+    if ($image === false) {
+        return ['error' => "Failed to read the uploaded " . $file['type'] . " image."];
+    }
+
+    // Process image based on max_size setting
+    if ($max_size === 'original') {
+        // Send original image without processing
+        $image_data = file_get_contents($file['tmp_name']);
+        if ($image_data === false) {
+            return ['error' => 'Failed to read the uploaded image.'];
+        }
+        $mime_type = $detected_mime;
+    } else {
+        // Resize the image
+        $resize_result = resizeImage($image, intval($max_size));
+        $resized_image = $resize_result['image'];
+        $new_width = $resize_result['width'];
+        $new_height = $resize_result['height'];
+
+        // Copy the original image to the resized image
+        imagecopyresampled($resized_image, $image, 0, 0, 0, 0, $new_width, $new_height, imagesx($image), imagesy($image));
+
+        // Save resized image to temporary file as JPEG
+        $temp_image_path = tempnam(sys_get_temp_dir(), 'exp_') . '.jpg';
+        $success = imagejpeg($resized_image, $temp_image_path, 85);
+
+        if (!$success) {
+            return ['error' => 'Failed to process the uploaded image.'];
+        }
+
+        // Read the resized image data
+        $image_data = file_get_contents($temp_image_path);
+        if ($image_data === false) {
+            return ['error' => 'Failed to read the processed image.'];
+        }
+
+        // Clean up temporary file
+        unlink($temp_image_path);
+        $mime_type = 'image/jpeg';
+
+        // Clean up image resources
+        imagedestroy($image);
+        imagedestroy($resized_image);
+    }
+
+    return [
+        'image_data' => $image_data,
+        'mime_type' => $mime_type
+    ];
+}
+
+/**
  * Preprocess image for better OCR results
  * Enhances contrast, applies threshold, and resizes image
  *

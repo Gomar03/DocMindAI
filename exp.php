@@ -174,112 +174,41 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
     $file_content = '';
     $is_image = false;
     $image_data = null;
+    $mime_type = null;
 
     if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
         $file = $_FILES['file'];
 
-        // Validate file size
-        if ($file['size'] > MAX_FILE_SIZE) {
-            $error = 'The file is too large. Maximum ' . (MAX_FILE_SIZE / 1024 / 1024) . 'MB allowed.';
-            $processing = false;
-        } else {
-            // Check if it's an image
-            $image_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-            if (in_array($file['type'], $image_types)) {
-                $is_image = true;
-                // Create image resource from uploaded file
-                $image = null;
+        // Check if it's an image
+        $image_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (in_array($file['type'], $image_types)) {
+            $is_image = true;
+            // Get max image size from form or use default
+            $max_size = isset($_POST['max_image_size']) ? $_POST['max_image_size'] : '500';
 
-                // Try to detect actual image type from file content
-                $image_info = @getimagesize($file['tmp_name']);
-                if ($image_info === false) {
-                    $error = "Failed to detect image type from the uploaded file.";
-                    $processing = false;
-                } else {
-                    $detected_mime = $image_info['mime'];
+            // Process uploaded image using the new function
+            $image_processing_result = processUploadedImage($file, $max_size);
 
-                    // Use detected MIME type instead of browser-reported type
-                    switch ($detected_mime) {
-                        case 'image/jpeg':
-                            $image = imagecreatefromjpeg($file['tmp_name']);
-                            break;
-                        case 'image/png':
-                            $image = imagecreatefrompng($file['tmp_name']);
-                            break;
-                        case 'image/gif':
-                            $image = imagecreatefromgif($file['tmp_name']);
-                            break;
-                        case 'image/webp':
-                            $image = imagecreatefromwebp($file['tmp_name']);
-                            break;
-                        default:
-                            $error = "Unsupported image type: " . htmlspecialchars($detected_mime);
-                            $processing = false;
-                            break;
-                    }
-                }
-
-                if ($image === false) {
-                    $error = "Failed to read the uploaded " . $file['type'] . " image.";
-                    $processing = false;
-                } else {
-                    // Get max image size from form or use default
-                    $max_size = isset($_POST['max_image_size']) ? $_POST['max_image_size'] : '500';
-
-                    if ($max_size === 'original') {
-                        // Send original image without processing
-                        $image_data = file_get_contents($file['tmp_name']);
-                        if ($image_data === false) {
-                            $error = 'Failed to read the uploaded image.';
-                            $processing = false;
-                        }
-                    } else {
-                        // Resize the image
-                        $resize_result = resizeImage($image, intval($max_size));
-                        $resized_image = $resize_result['image'];
-                        $new_width = $resize_result['width'];
-                        $new_height = $resize_result['height'];
-
-                        // Copy the original image to the resized image
-                        imagecopyresampled($resized_image, $image, 0, 0, 0, 0, $new_width, $new_height, imagesx($image), imagesy($image));
-
-                        // Save resized image to temporary file as JPEG
-                        $temp_image_path = tempnam(sys_get_temp_dir(), 'exp_') . '.jpg';
-                        $success = imagejpeg($resized_image, $temp_image_path, 85);
-
-                        if (!$success) {
-                            $error = 'Failed to process the uploaded image.';
-                            $processing = false;
-                        } else {
-                            // Read the resized image data
-                            $image_data = file_get_contents($temp_image_path);
-                            if ($image_data === false) {
-                                $error = 'Failed to read the processed image.';
-                                $processing = false;
-                            }
-                            // Clean up temporary file
-                            unlink($temp_image_path);
-                        }
-
-                        // Clean up image resources
-                        imagedestroy($image);
-                        imagedestroy($resized_image);
-                    }
-                }
+            if (isset($image_processing_result['error'])) {
+                $error = $image_processing_result['error'];
+                $processing = false;
             } else {
-                // Text document - try to extract text
-                $file_content = extractTextFromDocument($file['tmp_name'], $file['type']);
-                if ($file_content === false) {
-                    $error = 'Failed to extract text from the uploaded document. Please ensure you have the required tools installed (antiword, catdoc, pdftotext, odt2txt, or pandoc).';
-                    $processing = false;
-                } else {
-                    // Clean up the text content
-                    $file_content = trim($file_content);
-                    // Remove BOM if present
-                    $file_content = preg_replace('/^\xEF\xBB\xBF/', '', $file_content);
-                    // Normalize line endings
-                    $file_content = str_replace(["\r\n", "\r"], "\n", $file_content);
-                }
+                $image_data = $image_processing_result['image_data'];
+                $mime_type = $image_processing_result['mime_type'];
+            }
+        } else {
+            // Text document - try to extract text
+            $file_content = extractTextFromDocument($file['tmp_name'], $file['type']);
+            if ($file_content === false) {
+                $error = 'Failed to extract text from the uploaded document. Please ensure you have the required tools installed (antiword, catdoc, pdftotext, odt2txt, or pandoc).';
+                $processing = false;
+            } else {
+                // Clean up the text content
+                $file_content = trim($file_content);
+                // Remove BOM if present
+                $file_content = preg_replace('/^\xEF\xBB\xBF/', '', $file_content);
+                // Normalize line endings
+                $file_content = str_replace(["\r\n", "\r"], "\n", $file_content);
             }
         }
     }
@@ -316,9 +245,6 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
         if ($is_image && $image_data !== null) {
             // Convert image to base64
             $base64_image = base64_encode($image_data);
-
-            // Use original MIME type if sending original image, otherwise use JPEG
-            $mime_type = ($max_size === 'original') ? $file['type'] : 'image/jpeg';
 
             $api_data['messages'][] = [
                 'role' => 'user',
