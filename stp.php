@@ -447,26 +447,16 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['content']) || (iss
                     </small>
                     
                     <label for="file">Or upload a file:</label>
-                    <input 
-                        type="file" 
-                        id="file" 
-                        name="file" 
-                        accept=".txt,.md,.doc,.docx,.pdf,.odt,text/plain,text/markdown,application/msword,application/vnd.openxmlformats-
-officedocument.wordprocessingml.document,application/pdf,application/vnd.oasis.opendocument.text">
+                    <input
+                        type="file"
+                        id="file"
+                        name="file"
+                        accept=".txt,.md,.doc,.docx,.pdf,.odt,.jpg,.jpeg,.png,.gif,.webp,text/plain,text/markdown,
+application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,applica
+tion/vnd.oasis.opendocument.text,image/jpeg,image/png,image/gif,image/webp">
                     <small>
-                        Upload a text (.txt, .md), document (.doc, .docx, .pdf, .odt), or image file of the paper. Maximum size: 10MB.
-                    </small>
-
-                    <label for="prompt_type">Analysis approach:</label>
-                    <select id="prompt_type" name="prompt_type">
-                        <?php foreach ($AVAILABLE_PROMPTS as $value => $label): ?>
-                            <option value="<?php echo htmlspecialchars($value); ?>" <?php echo ($PROMPT_TYPE === $value) ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($label); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                    <small>
-                        Select the structured approach for analyzing the paper.
+                        Upload a text (.txt, .md), document (.doc, .docx, .pdf, .odt), or image file of the paper.
+Maximum size: 10MB.
                     </small>
                 
                     <label for="model">AI model:</label>

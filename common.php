@@ -268,7 +268,7 @@ function processUploadedImage($file, $max_size = '500') {
         imagecopyresampled($resized_image, $image, 0, 0, 0, 0, $new_width, $new_height, imagesx($image), imagesy($image));
 
         // Save resized image to temporary file as JPEG
-        $temp_image_path = tempnam(sys_get_temp_dir(), 'exp_') . '.jpg';
+        $temp_image_path = tempnam(sys_get_temp_dir(), 'DocMindAI_') . '.jpg';
         $success = imagejpeg($resized_image, $temp_image_path, 85);
 
         if (!$success) {
