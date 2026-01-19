@@ -243,9 +243,9 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
                         // Copy the original image to the resized image
                         imagecopyresampled($resized_image, $image, 0, 0, 0, 0, $new_width, $new_height, imagesx($image), imagesy($image));
 
-                        // Save resized image to temporary file as PNG
-                        $temp_image_path = tempnam(sys_get_temp_dir(), 'exp_') . '.png';
-                        $success = imagepng($resized_image, $temp_image_path, 9);
+                        // Save resized image to temporary file as JPEG
+                        $temp_image_path = tempnam(sys_get_temp_dir(), 'exp_') . '.jpg';
+                        $success = imagejpeg($resized_image, $temp_image_path, 85);
 
                         if (!$success) {
                             $error = 'Failed to process the uploaded image.';
@@ -317,8 +317,8 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
             // Convert image to base64
             $base64_image = base64_encode($image_data);
 
-            // Use original MIME type if sending original image, otherwise use PNG
-            $mime_type = ($max_size === 'original') ? $file['type'] : 'image/png';
+            // Use original MIME type if sending original image, otherwise use JPEG
+            $mime_type = ($max_size === 'original') ? $file['type'] : 'image/jpeg';
 
             $api_data['messages'][] = [
                 'role' => 'user',
