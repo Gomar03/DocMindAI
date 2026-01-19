@@ -148,8 +148,11 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['data']) || (isset(
         $image_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
         if (in_array($file['type'], $image_types)) {
             $is_image = true;
+            // Get max image size from form or use default
+            $max_size = isset($_POST['max_image_size']) ? $_POST['max_image_size'] : 'original';
+
             // Process uploaded image using the new function
-            $image_processing_result = processUploadedImage($file);
+            $image_processing_result = processUploadedImage($file, $max_size);
 
             if (isset($image_processing_result['error'])) {
                 $error = $image_processing_result['error'];
@@ -409,6 +412,18 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['data']) || (isset(
                     </select>
                     <small>
                         Select the language for the extracted data output.
+                    </small>
+
+                    <label for="max_image_size">Maximum image size:</label>
+                    <select id="max_image_size" name="max_image_size">
+                        <option value="original" selected>Original</option>
+                        <option value="200">200x200</option>
+                        <option value="500">500x500</option>
+                        <option value="800">800x800</option>
+                        <option value="1000">1000x1000</option>
+                    </select>
+                    <small>
+                        Select the maximum dimensions for resizing uploaded images. Choose "Original" to send the image as-is without processing.
                     </small>
                 </fieldset>
                 
