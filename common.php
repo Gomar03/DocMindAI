@@ -169,12 +169,13 @@ function resizeImage($image, $max_size = 1000) {
         // Create new image with new dimensions
         $resized_image = imagecreatetruecolor($new_width, $new_height);
 
-        // Preserve transparency for PNG and GIF
+        // Preserve transparency for PNG and GIF, but use white background for JPEG
         if (imageistruecolor($image)) {
             imagealphablending($resized_image, false);
             imagesavealpha($resized_image, true);
-            $transparent = imagecolorallocatealpha($resized_image, 255, 255, 255, 127);
-            imagefilledrectangle($resized_image, 0, 0, $new_width, $new_height, $transparent);
+            // Use white background instead of transparent for better compatibility
+            $white = imagecolorallocate($resized_image, 255, 255, 255);
+            imagefilledrectangle($resized_image, 0, 0, $new_width, $new_height, $white);
         }
     } else {
         // Keep original dimensions
