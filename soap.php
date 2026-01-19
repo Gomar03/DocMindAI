@@ -202,59 +202,23 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['content']) || (iss
             $image_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
             if (in_array($file['type'], $image_types)) {
                 $is_image = true;
-                $image_path = $file['tmp_name'];
+                // Get max image size from form or use default
+                $max_size = isset($_POST['max_image_size']) ? $_POST['max_image_size'] : 'original';
 
-                // Create image resource from uploaded file
-                $image = null;
-                switch ($file['type']) {
-                    case 'image/jpeg':
-                        $image = imagecreatefromjpeg($image_path);
-                        break;
-                    case 'image/png':
-                        $image = imagecreatefrompng($image_path);
-                        break;
-                    case 'image/gif':
-                        $image = imagecreatefromgif($image_path);
-                        break;
-                    case 'image/webp':
-                        $image = imagecreatefromwebp($image_path);
-                        break;
-                }
+                // Process uploaded image using the new function
+                $image_processing_result = processUploadedImage($file, $max_size);
 
-                if ($image === false) {
-                    $error = 'Failed to read the uploaded image.';
+                if (isset($image_processing_result['error'])) {
+                    $error = $image_processing_result['error'];
                     $processing = false;
                 } else {
-                    // Resize the image
-                    $resize_result = resizeImage($image);
-                    $resized_image = $resize_result['image'];
+                    $image_data = $image_processing_result['image_data'];
+                    $mime_type = $image_processing_result['mime_type'];
+                }
 
-                    // Save resized image to temporary file
-                    $temp_image_path = tempnam(sys_get_temp_dir(), 'soap_') . '.png';
-                    $success = imagepng($resized_image, $temp_image_path, 9);
-
-                    if (!$success) {
-                        $error = 'Failed to process the uploaded image.';
-                        $processing = false;
-                    } else {
-                        // Read the resized image data
-                        $image_data = file_get_contents($temp_image_path);
-                        if ($image_data === false) {
-                            $error = 'Failed to read the processed image.';
-                            $processing = false;
-                        }
-                        // Clean up temporary file
-                        unlink($temp_image_path);
-                    }
-
-                    // Clean up image resources
-                    imagedestroy($image);
-                    imagedestroy($resized_image);
-
-                    if ($processing) {
-                        // For image processing, we'll send the image directly to the vision model
-                        $content = "IMAGE_TRANSCRIPT_PLACEHOLDER";
-                    }
+                if ($processing) {
+                    // For image processing, we'll send the image directly to the vision model
+                    $content = "IMAGE_TRANSCRIPT_PLACEHOLDER";
                 }
             } else {
                 // Document file - try to extract text
@@ -313,7 +277,6 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['content']) || (iss
         if ($is_image && isset($image_data)) {
             // Convert image to base64
             $base64_image = base64_encode($image_data);
-            $mime_type = $file['type'];
             $api_data['messages'][] = [
                 'role' => 'user',
                 'content' => [
@@ -498,6 +461,18 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['content']) || (iss
                     </select>
                     <small>
                         Select the language for the SOAP note output.
+                    </small>
+
+                    <label for="max_image_size">Maximum image size:</label>
+                    <select id="max_image_size" name="max_image_size">
+                        <option value="original" selected>Original</option>
+                        <option value="200">200x200</option>
+                        <option value="500">500x500</option>
+                        <option value="800">800x800</option>
+                        <option value="1000">1000x1000</option>
+                    </select>
+                    <small>
+                        Select the maximum dimensions for resizing uploaded images. Choose "Original" to send the image as-is without processing.
                     </small>
                 </fieldset>
 
