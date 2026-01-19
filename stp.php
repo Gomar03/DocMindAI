@@ -237,8 +237,25 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['content']) || (iss
             // Check if it's an image
             $image_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
             if (in_array($file['type'], $image_types)) {
-                $error = 'Image files are not supported for paper summarization. Please upload text or document files.';
-                $processing = false;
+                $is_image = true;
+                // Get max image size from form or use default
+                $max_size = isset($_POST['max_image_size']) ? $_POST['max_image_size'] : 'original';
+
+                // Process uploaded image using the new function
+                $image_processing_result = processUploadedImage($file, $max_size);
+
+                if (isset($image_processing_result['error'])) {
+                    $error = $image_processing_result['error'];
+                    $processing = false;
+                } else {
+                    $image_data = $image_processing_result['image_data'];
+                    $mime_type = $image_processing_result['mime_type'];
+                }
+
+                if ($processing) {
+                    // For image processing, we'll send the image directly to the vision model
+                    $content = "IMAGE_TRANSCRIPT_PLACEHOLDER";
+                }
             } else {
                 // Document file - try to extract text
                 $content = extractTextFromDocument($file['tmp_name'], $file['type']);
@@ -279,16 +296,30 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['content']) || (iss
         $SYSTEM_PROMPT = getSystemPrompt($PROMPT_TYPE, $LANGUAGE);
         
         // Prepare API request
-        $data = [
+        $api_data = [
             'model' => $MODEL,
             'messages' => [
-                ['role' => 'system', 'content' => $SYSTEM_PROMPT],
-                ['role' => 'user', 'content' => "PAPER CONTENT TO ANALYZE:\n" . $content]
+                ['role' => 'system', 'content' => $SYSTEM_PROMPT]
             ]
         ];
+
+        // If it's an image, add it as a separate message with image data
+        if (isset($is_image) && $is_image && isset($image_data)) {
+            // Convert image to base64
+            $base64_image = base64_encode($image_data);
+            $api_data['messages'][] = [
+                'role' => 'user',
+                'content' => [
+                    ['type' => 'image_url', 'image_url' => ['url' => "data:$mime_type;base64,$base64_image"]]
+                ]
+            ];
+        } else {
+            // Add user message with content
+            $api_data['messages'][] = ['role' => 'user', 'content' => "PAPER CONTENT TO ANALYZE:\n" . $content];
+        }
         
         // Make API request using common function
-        $response_data = callLLMApi($LLM_API_ENDPOINT_CHAT, $data, $LLM_API_KEY);
+        $response_data = callLLMApi($LLM_API_ENDPOINT_CHAT, $api_data, $LLM_API_KEY);
         
         if (isset($response_data['error'])) {
             $error = $response_data['error'];
@@ -460,6 +491,18 @@ officedocument.wordprocessingml.document,application/pdf,application/vnd.oasis.o
                     </select>
                     <small>
                         Select the language for the analysis output.
+                    </small>
+
+                    <label for="max_image_size">Maximum image size:</label>
+                    <select id="max_image_size" name="max_image_size">
+                        <option value="original" selected>Original</option>
+                        <option value="200">200x200</option>
+                        <option value="500">500x500</option>
+                        <option value="800">800x800</option>
+                        <option value="1000">1000x1000</option>
+                    </select>
+                    <small>
+                        Select the maximum dimensions for resizing uploaded images. Choose "Original" to send the image as-is without processing.
                     </small>
                 </fieldset>
                 
