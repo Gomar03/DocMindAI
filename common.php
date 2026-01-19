@@ -168,11 +168,27 @@ function resizeImage($image, $max_size = 1000) {
 
         // Create new image with new dimensions
         $resized_image = imagecreatetruecolor($new_width, $new_height);
+
+        // Preserve transparency for PNG and GIF
+        if (imageistruecolor($image)) {
+            imagealphablending($resized_image, false);
+            imagesavealpha($resized_image, true);
+            $transparent = imagecolorallocatealpha($resized_image, 255, 255, 255, 127);
+            imagefilledrectangle($resized_image, 0, 0, $new_width, $new_height, $transparent);
+        }
     } else {
         // Keep original dimensions
         $new_width = $width;
         $new_height = $height;
         $resized_image = imagecreatetruecolor($new_width, $new_height);
+
+        // Preserve transparency for PNG and GIF
+        if (imageistruecolor($image)) {
+            imagealphablending($resized_image, false);
+            imagesavealpha($resized_image, true);
+            $transparent = imagecolorallocatealpha($resized_image, 255, 255, 255, 127);
+            imagefilledrectangle($resized_image, 0, 0, $new_width, $new_height, $transparent);
+        }
     }
 
     return [
@@ -238,7 +254,7 @@ function preprocessImageForOCR($image_path, $apply_threshold = false, $apply_dil
         imagefilledrectangle($resized_image, 0, 0, $new_width, $new_height, $transparent);
     }
 
-    // Resize image
+    // Resize image with proper color copying
     imagecopyresampled($resized_image, $image, 0, 0, 0, 0, $new_width, $new_height, $width, $height);
     
     // Convert to grayscale
